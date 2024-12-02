@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/jonathan/Desktop/reggy/target/debug/build/reggy-f46749a1c09177a1/out/parser/grammar.rs`."><title>grammar.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../../../../../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../../../../../../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../../../../../../../../../static.files/rustdoc-492a78a4a87dcc01.css"><meta name="rustdoc-vars" data-root-path="../../../../../../../../../../../../" data-static-root-path="../../../../../../../../../../../../static.files/" data-current-crate="reggy" data-themes="" data-resource-suffix="" data-rustdoc-version="1.82.0 (f6e511eec 2024-10-15)" data-channel="1.82.0" data-search-js="search-a99f1315e7cc5121.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../../../../../../../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../../../../../../../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../../../../../../../../../src-files.js"></script><script defer src="../../../../../../../../../../../../static.files/main-921df33f47b8780c.js"></script><noscript><link rel="stylesheet" href="../../../../../../../../../../../../static.files/noscript-3b12f09e550e0385.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../../../../../../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../../../../../../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/jonathan/Desktop/reggy/target/debug/build/reggy-7afc599442841cfe/out/parser/grammar.rs`."><title>grammar.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../../../../../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../../../../../../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../../../../../../../../../static.files/rustdoc-492a78a4a87dcc01.css"><meta name="rustdoc-vars" data-root-path="../../../../../../../../../../../../" data-static-root-path="../../../../../../../../../../../../static.files/" data-current-crate="reggy" data-themes="" data-resource-suffix="" data-rustdoc-version="1.82.0 (f6e511eec 2024-10-15)" data-channel="1.82.0" data-search-js="search-a99f1315e7cc5121.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../../../../../../../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../../../../../../../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../../../../../../../../../src-files.js"></script><script defer src="../../../../../../../../../../../../static.files/main-921df33f47b8780c.js"></script><noscript><link rel="stylesheet" href="../../../../../../../../../../../../static.files/noscript-3b12f09e550e0385.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../../../../../../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../../../../../../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -3273,7 +3273,8 @@
 <a href="#3273" id="3273">3273</a>
 <a href="#3274" id="3274">3274</a>
 <a href="#3275" id="3275">3275</a>
-</pre></div><pre class="rust"><code><span class="comment">// auto-generated: "lalrpop 0.20.2"
+<a href="#3276" id="3276">3276</a>
+</pre></div><pre class="rust"><code><span class="comment">// auto-generated: "lalrpop 0.22.0"
 // sha3: fdb57477017d03b9a0873c07f5da44598f8311749570fff2f12443779ea6b480
 </span><span class="kw">use </span><span class="kw">crate</span>::parser::{lexer, ast, Error};
 <span class="kw">use </span>lexer::Tok;
@@ -3282,11 +3283,11 @@
 </span><span class="kw">extern crate </span>lalrpop_util <span class="kw">as </span>__lalrpop_util;
 <span class="attr">#[allow(unused_imports)]
 </span><span class="kw">use </span><span class="self">self</span>::__lalrpop_util::state_machine <span class="kw">as </span>__state_machine;
-<span class="kw">extern crate </span>core;
-<span class="kw">extern crate </span>alloc;
+<span class="attr">#[allow(unused_extern_crates)]
+</span><span class="kw">extern crate </span>alloc;
 
 <span class="attr">#[rustfmt::skip]
-#[allow(non_snake_case, non_camel_case_types, unused_mut, unused_variables, unused_imports, unused_parens, clippy::needless_lifetimes, clippy::type_complexity, clippy::needless_return, clippy::too_many_arguments, clippy::never_loop, clippy::match_single_binding, clippy::needless_raw_string_hashes)]
+#[allow(explicit_outlives_requirements, non_snake_case, non_camel_case_types, unused_mut, unused_variables, unused_imports, unused_parens, clippy::needless_lifetimes, clippy::type_complexity, clippy::needless_return, clippy::too_many_arguments, clippy::never_loop, clippy::match_single_binding, clippy::needless_raw_string_hashes)]
 </span><span class="kw">mod </span>__parse__Ast {
 
     <span class="kw">use </span><span class="kw">crate</span>::parser::{lexer, ast, Error};
@@ -3296,8 +3297,8 @@
     </span><span class="kw">extern crate </span>lalrpop_util <span class="kw">as </span>__lalrpop_util;
     <span class="attr">#[allow(unused_imports)]
     </span><span class="kw">use </span><span class="self">self</span>::__lalrpop_util::state_machine <span class="kw">as </span>__state_machine;
-    <span class="kw">extern crate </span>core;
-    <span class="kw">extern crate </span>alloc;
+    <span class="attr">#[allow(unused_extern_crates)]
+    </span><span class="kw">extern crate </span>alloc;
     <span class="kw">use </span><span class="kw">super</span>::__ToTriple;
     <span class="attr">#[allow(dead_code)]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">enum </span>__Symbol&lt;&gt;
@@ -3308,41 +3309,41 @@
     }
     <span class="kw">const </span>__ACTION: <span class="kw-2">&amp;</span>[i8] = <span class="kw-2">&amp;</span>[
         <span class="comment">// State 0
-        </span><span class="number">0</span>, <span class="number">3</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">11</span>, <span class="number">12</span>, <span class="number">0</span>,
+        </span><span class="number">0</span>, <span class="number">0</span>, <span class="number">3</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">11</span>, <span class="number">12</span>,
         <span class="comment">// State 1
-        </span><span class="number">0</span>, <span class="number">3</span>, -<span class="number">2</span>, <span class="number">0</span>, <span class="number">11</span>, <span class="number">12</span>, -<span class="number">2</span>,
+        </span>-<span class="number">2</span>, <span class="number">0</span>, <span class="number">3</span>, -<span class="number">2</span>, <span class="number">0</span>, <span class="number">11</span>, <span class="number">12</span>,
         <span class="comment">// State 2
-        </span><span class="number">5</span>, <span class="number">3</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">11</span>, <span class="number">12</span>, <span class="number">0</span>,
+        </span><span class="number">0</span>, <span class="number">0</span>, <span class="number">3</span>, <span class="number">0</span>, <span class="number">5</span>, <span class="number">11</span>, <span class="number">12</span>,
         <span class="comment">// State 3
-        </span><span class="number">0</span>, <span class="number">3</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">11</span>, <span class="number">12</span>, <span class="number">0</span>,
+        </span><span class="number">0</span>, <span class="number">0</span>, <span class="number">3</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">11</span>, <span class="number">12</span>,
         <span class="comment">// State 4
-        </span><span class="number">0</span>, <span class="number">3</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">11</span>, <span class="number">12</span>, <span class="number">0</span>,
+        </span><span class="number">0</span>, <span class="number">0</span>, <span class="number">3</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">11</span>, <span class="number">12</span>,
         <span class="comment">// State 5
-        </span><span class="number">0</span>, <span class="number">3</span>, -<span class="number">1</span>, <span class="number">0</span>, <span class="number">11</span>, <span class="number">12</span>, -<span class="number">1</span>,
+        </span>-<span class="number">1</span>, <span class="number">0</span>, <span class="number">3</span>, -<span class="number">1</span>, <span class="number">0</span>, <span class="number">11</span>, <span class="number">12</span>,
         <span class="comment">// State 6
-        </span><span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">4</span>,
+        </span><span class="number">4</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
         <span class="comment">// State 7
-        </span><span class="number">0</span>, -<span class="number">5</span>, -<span class="number">5</span>, -<span class="number">5</span>, -<span class="number">5</span>, -<span class="number">5</span>, -<span class="number">5</span>,
+        </span>-<span class="number">5</span>, -<span class="number">5</span>, -<span class="number">5</span>, -<span class="number">5</span>, <span class="number">0</span>, -<span class="number">5</span>, -<span class="number">5</span>,
         <span class="comment">// State 8
-        </span><span class="number">0</span>, -<span class="number">7</span>, -<span class="number">7</span>, <span class="number">13</span>, -<span class="number">7</span>, -<span class="number">7</span>, -<span class="number">7</span>,
+        </span>-<span class="number">7</span>, <span class="number">13</span>, -<span class="number">7</span>, -<span class="number">7</span>, <span class="number">0</span>, -<span class="number">7</span>, -<span class="number">7</span>,
         <span class="comment">// State 9
-        </span><span class="number">0</span>, -<span class="number">3</span>, -<span class="number">3</span>, -<span class="number">3</span>, -<span class="number">3</span>, -<span class="number">3</span>, -<span class="number">3</span>,
+        </span>-<span class="number">3</span>, -<span class="number">3</span>, -<span class="number">3</span>, -<span class="number">3</span>, <span class="number">0</span>, -<span class="number">3</span>, -<span class="number">3</span>,
         <span class="comment">// State 10
-        </span><span class="number">0</span>, -<span class="number">9</span>, -<span class="number">9</span>, -<span class="number">9</span>, -<span class="number">9</span>, -<span class="number">9</span>, -<span class="number">9</span>,
+        </span>-<span class="number">9</span>, -<span class="number">9</span>, -<span class="number">9</span>, -<span class="number">9</span>, <span class="number">0</span>, -<span class="number">9</span>, -<span class="number">9</span>,
         <span class="comment">// State 11
-        </span><span class="number">0</span>, -<span class="number">8</span>, -<span class="number">8</span>, -<span class="number">8</span>, -<span class="number">8</span>, -<span class="number">8</span>, -<span class="number">8</span>,
+        </span>-<span class="number">8</span>, -<span class="number">8</span>, -<span class="number">8</span>, -<span class="number">8</span>, <span class="number">0</span>, -<span class="number">8</span>, -<span class="number">8</span>,
         <span class="comment">// State 12
-        </span><span class="number">0</span>, -<span class="number">4</span>, -<span class="number">4</span>, -<span class="number">4</span>, -<span class="number">4</span>, -<span class="number">4</span>, -<span class="number">4</span>,
+        </span>-<span class="number">4</span>, -<span class="number">4</span>, -<span class="number">4</span>, -<span class="number">4</span>, <span class="number">0</span>, -<span class="number">4</span>, -<span class="number">4</span>,
         <span class="comment">// State 13
-        </span><span class="number">0</span>, -<span class="number">6</span>, -<span class="number">6</span>, <span class="number">13</span>, -<span class="number">6</span>, -<span class="number">6</span>, -<span class="number">6</span>,
+        </span>-<span class="number">6</span>, <span class="number">13</span>, -<span class="number">6</span>, -<span class="number">6</span>, <span class="number">0</span>, -<span class="number">6</span>, -<span class="number">6</span>,
         <span class="comment">// State 14
-        </span><span class="number">0</span>, <span class="number">0</span>, <span class="number">16</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">4</span>,
+        </span><span class="number">4</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">16</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
         <span class="comment">// State 15
-        </span><span class="number">0</span>, -<span class="number">10</span>, -<span class="number">10</span>, -<span class="number">10</span>, -<span class="number">10</span>, -<span class="number">10</span>, -<span class="number">10</span>,
+        </span>-<span class="number">10</span>, -<span class="number">10</span>, -<span class="number">10</span>, -<span class="number">10</span>, <span class="number">0</span>, -<span class="number">10</span>, -<span class="number">10</span>,
         <span class="comment">// State 16
-        </span><span class="number">0</span>, <span class="number">0</span>, <span class="number">18</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">4</span>,
+        </span><span class="number">4</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">18</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
         <span class="comment">// State 17
-        </span><span class="number">0</span>, -<span class="number">11</span>, -<span class="number">11</span>, -<span class="number">11</span>, -<span class="number">11</span>, -<span class="number">11</span>, -<span class="number">11</span>,
+        </span>-<span class="number">11</span>, -<span class="number">11</span>, -<span class="number">11</span>, -<span class="number">11</span>, <span class="number">0</span>, -<span class="number">11</span>, -<span class="number">11</span>,
     ];
     <span class="kw">fn </span>__action(state: i8, integer: usize) -&gt; i8 {
         __ACTION[(state <span class="kw">as </span>usize) * <span class="number">7 </span>+ integer]
@@ -3406,13 +3407,13 @@
         }
     }
     <span class="kw">const </span>__TERMINAL: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>str] = <span class="kw-2">&amp;</span>[
-        <span class="string">r###""!""###</span>,
+        <span class="string">r###""|""###</span>,
+        <span class="string">r###""?""###</span>,
         <span class="string">r###""(""###</span>,
         <span class="string">r###"")""###</span>,
-        <span class="string">r###""?""###</span>,
+        <span class="string">r###""!""###</span>,
         <span class="string">r###""digit""###</span>,
         <span class="string">r###""literal""###</span>,
-        <span class="string">r###""|""###</span>,
     ];
     <span class="kw">fn </span>__expected_tokens(__state: i8) -&gt; alloc::vec::Vec&lt;alloc::string::String&gt; {
         __TERMINAL.iter().enumerate().filter_map(|(index, terminal)| {
@@ -3543,14 +3544,15 @@
         <span class="kw">_</span>: core::marker::PhantomData&lt;()&gt;,
     ) -&gt; <span class="prelude-ty">Option</span>&lt;usize&gt;
     {
-        <span class="kw">match </span><span class="kw-2">*</span>__token {
-            lexer::Tok::Exclam <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">0</span>),
-            lexer::Tok::LParen <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">1</span>),
-            lexer::Tok::RParen <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">2</span>),
-            lexer::Tok::QMark <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">3</span>),
-            lexer::Tok::Digit <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">4</span>),
-            lexer::Tok::Byte { b: <span class="kw">_</span>, .. } <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">5</span>),
-            lexer::Tok::Or <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">6</span>),
+        <span class="attr">#[warn(unused_variables)]
+        </span><span class="kw">match </span>__token {
+            lexer::Tok::Or <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">0</span>),
+            lexer::Tok::QMark <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">1</span>),
+            lexer::Tok::LParen <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">2</span>),
+            lexer::Tok::RParen <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">3</span>),
+            lexer::Tok::Exclam <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">4</span>),
+            lexer::Tok::Digit <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">5</span>),
+            lexer::Tok::Byte { b: <span class="kw">_</span>, .. } <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">6</span>),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
         }
     }
@@ -3562,8 +3564,8 @@
     ) -&gt; __Symbol&lt;&gt;
     {
         <span class="attr">#[allow(clippy::manual_range_patterns)]</span><span class="kw">match </span>__token_index {
-            <span class="number">0 </span>| <span class="number">1 </span>| <span class="number">2 </span>| <span class="number">3 </span>| <span class="number">4 </span>| <span class="number">6 </span>=&gt; __Symbol::Variant0(__token),
-            <span class="number">5 </span>=&gt; <span class="kw">match </span>__token {
+            <span class="number">0 </span>| <span class="number">1 </span>| <span class="number">2 </span>| <span class="number">3 </span>| <span class="number">4 </span>| <span class="number">5 </span>=&gt; __Symbol::Variant0(__token),
+            <span class="number">6 </span>=&gt; <span class="kw">match </span>__token {
                 lexer::Tok::Byte { b: __tok0, .. } <span class="kw">if </span><span class="bool-val">true </span>=&gt; __Symbol::Variant1(__tok0),
                 <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
             },
@@ -4060,7 +4062,7 @@
 </span><span class="kw">pub use </span><span class="self">self</span>::__parse__Ast::AstParser;
 
 <span class="attr">#[rustfmt::skip]
-#[allow(non_snake_case, non_camel_case_types, unused_mut, unused_variables, unused_imports, unused_parens, clippy::needless_lifetimes, clippy::type_complexity, clippy::needless_return, clippy::too_many_arguments, clippy::never_loop, clippy::match_single_binding, clippy::needless_raw_string_hashes)]
+#[allow(explicit_outlives_requirements, non_snake_case, non_camel_case_types, unused_mut, unused_variables, unused_imports, unused_parens, clippy::needless_lifetimes, clippy::type_complexity, clippy::needless_return, clippy::too_many_arguments, clippy::never_loop, clippy::match_single_binding, clippy::needless_raw_string_hashes)]
 </span><span class="kw">mod </span>__parse__Ast1 {
 
     <span class="kw">use </span><span class="kw">crate</span>::parser::{lexer, ast, Error};
@@ -4070,8 +4072,8 @@
     </span><span class="kw">extern crate </span>lalrpop_util <span class="kw">as </span>__lalrpop_util;
     <span class="attr">#[allow(unused_imports)]
     </span><span class="kw">use </span><span class="self">self</span>::__lalrpop_util::state_machine <span class="kw">as </span>__state_machine;
-    <span class="kw">extern crate </span>core;
-    <span class="kw">extern crate </span>alloc;
+    <span class="attr">#[allow(unused_extern_crates)]
+    </span><span class="kw">extern crate </span>alloc;
     <span class="kw">use </span><span class="kw">super</span>::__ToTriple;
     <span class="attr">#[allow(dead_code)]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">enum </span>__Symbol&lt;&gt;
@@ -4082,41 +4084,41 @@
     }
     <span class="kw">const </span>__ACTION: <span class="kw-2">&amp;</span>[i8] = <span class="kw-2">&amp;</span>[
         <span class="comment">// State 0
-        </span><span class="number">0</span>, <span class="number">2</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">9</span>, <span class="number">10</span>, <span class="number">0</span>,
+        </span><span class="number">0</span>, <span class="number">0</span>, <span class="number">2</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">9</span>, <span class="number">10</span>,
         <span class="comment">// State 1
-        </span><span class="number">4</span>, <span class="number">2</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">9</span>, <span class="number">10</span>, <span class="number">0</span>,
+        </span><span class="number">0</span>, <span class="number">0</span>, <span class="number">2</span>, <span class="number">0</span>, <span class="number">4</span>, <span class="number">9</span>, <span class="number">10</span>,
         <span class="comment">// State 2
-        </span><span class="number">0</span>, <span class="number">2</span>, -<span class="number">2</span>, <span class="number">0</span>, <span class="number">9</span>, <span class="number">10</span>, -<span class="number">2</span>,
+        </span>-<span class="number">2</span>, <span class="number">0</span>, <span class="number">2</span>, -<span class="number">2</span>, <span class="number">0</span>, <span class="number">9</span>, <span class="number">10</span>,
         <span class="comment">// State 3
-        </span><span class="number">0</span>, <span class="number">2</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">9</span>, <span class="number">10</span>, <span class="number">0</span>,
+        </span><span class="number">0</span>, <span class="number">0</span>, <span class="number">2</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">9</span>, <span class="number">10</span>,
         <span class="comment">// State 4
-        </span><span class="number">0</span>, <span class="number">2</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">9</span>, <span class="number">10</span>, <span class="number">0</span>,
+        </span><span class="number">0</span>, <span class="number">0</span>, <span class="number">2</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">9</span>, <span class="number">10</span>,
         <span class="comment">// State 5
-        </span><span class="number">0</span>, <span class="number">2</span>, -<span class="number">1</span>, <span class="number">0</span>, <span class="number">9</span>, <span class="number">10</span>, -<span class="number">1</span>,
+        </span>-<span class="number">1</span>, <span class="number">0</span>, <span class="number">2</span>, -<span class="number">1</span>, <span class="number">0</span>, <span class="number">9</span>, <span class="number">10</span>,
         <span class="comment">// State 6
         </span><span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
         <span class="comment">// State 7
-        </span><span class="number">0</span>, -<span class="number">3</span>, -<span class="number">3</span>, -<span class="number">3</span>, -<span class="number">3</span>, -<span class="number">3</span>, -<span class="number">3</span>,
+        </span>-<span class="number">3</span>, -<span class="number">3</span>, -<span class="number">3</span>, -<span class="number">3</span>, <span class="number">0</span>, -<span class="number">3</span>, -<span class="number">3</span>,
         <span class="comment">// State 8
-        </span><span class="number">0</span>, -<span class="number">9</span>, -<span class="number">9</span>, -<span class="number">9</span>, -<span class="number">9</span>, -<span class="number">9</span>, -<span class="number">9</span>,
+        </span>-<span class="number">9</span>, -<span class="number">9</span>, -<span class="number">9</span>, -<span class="number">9</span>, <span class="number">0</span>, -<span class="number">9</span>, -<span class="number">9</span>,
         <span class="comment">// State 9
-        </span><span class="number">0</span>, -<span class="number">8</span>, -<span class="number">8</span>, -<span class="number">8</span>, -<span class="number">8</span>, -<span class="number">8</span>, -<span class="number">8</span>,
+        </span>-<span class="number">8</span>, -<span class="number">8</span>, -<span class="number">8</span>, -<span class="number">8</span>, <span class="number">0</span>, -<span class="number">8</span>, -<span class="number">8</span>,
         <span class="comment">// State 10
-        </span><span class="number">0</span>, <span class="number">0</span>, <span class="number">14</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">5</span>,
+        </span><span class="number">5</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">14</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
         <span class="comment">// State 11
-        </span><span class="number">0</span>, -<span class="number">5</span>, -<span class="number">5</span>, -<span class="number">5</span>, -<span class="number">5</span>, -<span class="number">5</span>, -<span class="number">5</span>,
+        </span>-<span class="number">5</span>, -<span class="number">5</span>, -<span class="number">5</span>, -<span class="number">5</span>, <span class="number">0</span>, -<span class="number">5</span>, -<span class="number">5</span>,
         <span class="comment">// State 12
-        </span><span class="number">0</span>, -<span class="number">7</span>, -<span class="number">7</span>, <span class="number">15</span>, -<span class="number">7</span>, -<span class="number">7</span>, -<span class="number">7</span>,
+        </span>-<span class="number">7</span>, <span class="number">15</span>, -<span class="number">7</span>, -<span class="number">7</span>, <span class="number">0</span>, -<span class="number">7</span>, -<span class="number">7</span>,
         <span class="comment">// State 13
-        </span><span class="number">0</span>, -<span class="number">10</span>, -<span class="number">10</span>, -<span class="number">10</span>, -<span class="number">10</span>, -<span class="number">10</span>, -<span class="number">10</span>,
+        </span>-<span class="number">10</span>, -<span class="number">10</span>, -<span class="number">10</span>, -<span class="number">10</span>, <span class="number">0</span>, -<span class="number">10</span>, -<span class="number">10</span>,
         <span class="comment">// State 14
-        </span><span class="number">0</span>, -<span class="number">4</span>, -<span class="number">4</span>, -<span class="number">4</span>, -<span class="number">4</span>, -<span class="number">4</span>, -<span class="number">4</span>,
+        </span>-<span class="number">4</span>, -<span class="number">4</span>, -<span class="number">4</span>, -<span class="number">4</span>, <span class="number">0</span>, -<span class="number">4</span>, -<span class="number">4</span>,
         <span class="comment">// State 15
-        </span><span class="number">0</span>, -<span class="number">6</span>, -<span class="number">6</span>, <span class="number">15</span>, -<span class="number">6</span>, -<span class="number">6</span>, -<span class="number">6</span>,
+        </span>-<span class="number">6</span>, <span class="number">15</span>, -<span class="number">6</span>, -<span class="number">6</span>, <span class="number">0</span>, -<span class="number">6</span>, -<span class="number">6</span>,
         <span class="comment">// State 16
-        </span><span class="number">0</span>, <span class="number">0</span>, <span class="number">18</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">5</span>,
+        </span><span class="number">5</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">18</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
         <span class="comment">// State 17
-        </span><span class="number">0</span>, -<span class="number">11</span>, -<span class="number">11</span>, -<span class="number">11</span>, -<span class="number">11</span>, -<span class="number">11</span>, -<span class="number">11</span>,
+        </span>-<span class="number">11</span>, -<span class="number">11</span>, -<span class="number">11</span>, -<span class="number">11</span>, <span class="number">0</span>, -<span class="number">11</span>, -<span class="number">11</span>,
     ];
     <span class="kw">fn </span>__action(state: i8, integer: usize) -&gt; i8 {
         __ACTION[(state <span class="kw">as </span>usize) * <span class="number">7 </span>+ integer]
@@ -4182,13 +4184,13 @@
         }
     }
     <span class="kw">const </span>__TERMINAL: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>str] = <span class="kw-2">&amp;</span>[
-        <span class="string">r###""!""###</span>,
+        <span class="string">r###""|""###</span>,
+        <span class="string">r###""?""###</span>,
         <span class="string">r###""(""###</span>,
         <span class="string">r###"")""###</span>,
-        <span class="string">r###""?""###</span>,
+        <span class="string">r###""!""###</span>,
         <span class="string">r###""digit""###</span>,
         <span class="string">r###""literal""###</span>,
-        <span class="string">r###""|""###</span>,
     ];
     <span class="kw">fn </span>__expected_tokens(__state: i8) -&gt; alloc::vec::Vec&lt;alloc::string::String&gt; {
         __TERMINAL.iter().enumerate().filter_map(|(index, terminal)| {
@@ -4319,14 +4321,15 @@
         <span class="kw">_</span>: core::marker::PhantomData&lt;()&gt;,
     ) -&gt; <span class="prelude-ty">Option</span>&lt;usize&gt;
     {
-        <span class="kw">match </span><span class="kw-2">*</span>__token {
-            lexer::Tok::Exclam <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">0</span>),
-            lexer::Tok::LParen <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">1</span>),
-            lexer::Tok::RParen <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">2</span>),
-            lexer::Tok::QMark <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">3</span>),
-            lexer::Tok::Digit <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">4</span>),
-            lexer::Tok::Byte { b: <span class="kw">_</span>, .. } <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">5</span>),
-            lexer::Tok::Or <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">6</span>),
+        <span class="attr">#[warn(unused_variables)]
+        </span><span class="kw">match </span>__token {
+            lexer::Tok::Or <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">0</span>),
+            lexer::Tok::QMark <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">1</span>),
+            lexer::Tok::LParen <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">2</span>),
+            lexer::Tok::RParen <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">3</span>),
+            lexer::Tok::Exclam <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">4</span>),
+            lexer::Tok::Digit <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">5</span>),
+            lexer::Tok::Byte { b: <span class="kw">_</span>, .. } <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">6</span>),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
         }
     }
@@ -4338,8 +4341,8 @@
     ) -&gt; __Symbol&lt;&gt;
     {
         <span class="attr">#[allow(clippy::manual_range_patterns)]</span><span class="kw">match </span>__token_index {
-            <span class="number">0 </span>| <span class="number">1 </span>| <span class="number">2 </span>| <span class="number">3 </span>| <span class="number">4 </span>| <span class="number">6 </span>=&gt; __Symbol::Variant0(__token),
-            <span class="number">5 </span>=&gt; <span class="kw">match </span>__token {
+            <span class="number">0 </span>| <span class="number">1 </span>| <span class="number">2 </span>| <span class="number">3 </span>| <span class="number">4 </span>| <span class="number">5 </span>=&gt; __Symbol::Variant0(__token),
+            <span class="number">6 </span>=&gt; <span class="kw">match </span>__token {
                 lexer::Tok::Byte { b: __tok0, .. } <span class="kw">if </span><span class="bool-val">true </span>=&gt; __Symbol::Variant1(__tok0),
                 <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
             },
@@ -4836,7 +4839,7 @@
 </span><span class="kw">pub use </span><span class="self">self</span>::__parse__Ast1::Ast1Parser;
 
 <span class="attr">#[rustfmt::skip]
-#[allow(non_snake_case, non_camel_case_types, unused_mut, unused_variables, unused_imports, unused_parens, clippy::needless_lifetimes, clippy::type_complexity, clippy::needless_return, clippy::too_many_arguments, clippy::never_loop, clippy::match_single_binding, clippy::needless_raw_string_hashes)]
+#[allow(explicit_outlives_requirements, non_snake_case, non_camel_case_types, unused_mut, unused_variables, unused_imports, unused_parens, clippy::needless_lifetimes, clippy::type_complexity, clippy::needless_return, clippy::too_many_arguments, clippy::never_loop, clippy::match_single_binding, clippy::needless_raw_string_hashes)]
 </span><span class="kw">mod </span>__parse__Ast2 {
 
     <span class="kw">use </span><span class="kw">crate</span>::parser::{lexer, ast, Error};
@@ -4846,8 +4849,8 @@
     </span><span class="kw">extern crate </span>lalrpop_util <span class="kw">as </span>__lalrpop_util;
     <span class="attr">#[allow(unused_imports)]
     </span><span class="kw">use </span><span class="self">self</span>::__lalrpop_util::state_machine <span class="kw">as </span>__state_machine;
-    <span class="kw">extern crate </span>core;
-    <span class="kw">extern crate </span>alloc;
+    <span class="attr">#[allow(unused_extern_crates)]
+    </span><span class="kw">extern crate </span>alloc;
     <span class="kw">use </span><span class="kw">super</span>::__ToTriple;
     <span class="attr">#[allow(dead_code)]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">enum </span>__Symbol&lt;&gt;
@@ -4858,41 +4861,41 @@
     }
     <span class="kw">const </span>__ACTION: <span class="kw-2">&amp;</span>[i8] = <span class="kw-2">&amp;</span>[
         <span class="comment">// State 0
-        </span><span class="number">0</span>, <span class="number">2</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">10</span>, <span class="number">11</span>, <span class="number">0</span>,
+        </span><span class="number">0</span>, <span class="number">0</span>, <span class="number">2</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">10</span>, <span class="number">11</span>,
         <span class="comment">// State 1
-        </span><span class="number">4</span>, <span class="number">2</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">10</span>, <span class="number">11</span>, <span class="number">0</span>,
+        </span><span class="number">0</span>, <span class="number">0</span>, <span class="number">2</span>, <span class="number">0</span>, <span class="number">4</span>, <span class="number">10</span>, <span class="number">11</span>,
         <span class="comment">// State 2
-        </span><span class="number">0</span>, <span class="number">2</span>, -<span class="number">2</span>, <span class="number">0</span>, <span class="number">10</span>, <span class="number">11</span>, -<span class="number">2</span>,
+        </span>-<span class="number">2</span>, <span class="number">0</span>, <span class="number">2</span>, -<span class="number">2</span>, <span class="number">0</span>, <span class="number">10</span>, <span class="number">11</span>,
         <span class="comment">// State 3
-        </span><span class="number">0</span>, <span class="number">2</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">10</span>, <span class="number">11</span>, <span class="number">0</span>,
+        </span><span class="number">0</span>, <span class="number">0</span>, <span class="number">2</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">10</span>, <span class="number">11</span>,
         <span class="comment">// State 4
-        </span><span class="number">0</span>, <span class="number">2</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">10</span>, <span class="number">11</span>, <span class="number">0</span>,
+        </span><span class="number">0</span>, <span class="number">0</span>, <span class="number">2</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">10</span>, <span class="number">11</span>,
         <span class="comment">// State 5
-        </span><span class="number">0</span>, <span class="number">2</span>, -<span class="number">1</span>, <span class="number">0</span>, <span class="number">10</span>, <span class="number">11</span>, -<span class="number">1</span>,
+        </span>-<span class="number">1</span>, <span class="number">0</span>, <span class="number">2</span>, -<span class="number">1</span>, <span class="number">0</span>, <span class="number">10</span>, <span class="number">11</span>,
         <span class="comment">// State 6
-        </span><span class="number">0</span>, -<span class="number">5</span>, -<span class="number">5</span>, -<span class="number">5</span>, -<span class="number">5</span>, -<span class="number">5</span>, -<span class="number">5</span>,
+        </span>-<span class="number">5</span>, -<span class="number">5</span>, -<span class="number">5</span>, -<span class="number">5</span>, <span class="number">0</span>, -<span class="number">5</span>, -<span class="number">5</span>,
         <span class="comment">// State 7
-        </span><span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">12</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
+        </span><span class="number">0</span>, <span class="number">12</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
         <span class="comment">// State 8
-        </span><span class="number">0</span>, -<span class="number">3</span>, -<span class="number">3</span>, -<span class="number">3</span>, -<span class="number">3</span>, -<span class="number">3</span>, -<span class="number">3</span>,
+        </span>-<span class="number">3</span>, -<span class="number">3</span>, -<span class="number">3</span>, -<span class="number">3</span>, <span class="number">0</span>, -<span class="number">3</span>, -<span class="number">3</span>,
         <span class="comment">// State 9
-        </span><span class="number">0</span>, -<span class="number">9</span>, -<span class="number">9</span>, -<span class="number">9</span>, -<span class="number">9</span>, -<span class="number">9</span>, -<span class="number">9</span>,
+        </span>-<span class="number">9</span>, -<span class="number">9</span>, -<span class="number">9</span>, -<span class="number">9</span>, <span class="number">0</span>, -<span class="number">9</span>, -<span class="number">9</span>,
         <span class="comment">// State 10
-        </span><span class="number">0</span>, -<span class="number">8</span>, -<span class="number">8</span>, -<span class="number">8</span>, -<span class="number">8</span>, -<span class="number">8</span>, -<span class="number">8</span>,
+        </span>-<span class="number">8</span>, -<span class="number">8</span>, -<span class="number">8</span>, -<span class="number">8</span>, <span class="number">0</span>, -<span class="number">8</span>, -<span class="number">8</span>,
         <span class="comment">// State 11
-        </span><span class="number">0</span>, -<span class="number">4</span>, -<span class="number">4</span>, -<span class="number">4</span>, -<span class="number">4</span>, -<span class="number">4</span>, -<span class="number">4</span>,
+        </span>-<span class="number">4</span>, -<span class="number">4</span>, -<span class="number">4</span>, -<span class="number">4</span>, <span class="number">0</span>, -<span class="number">4</span>, -<span class="number">4</span>,
         <span class="comment">// State 12
-        </span><span class="number">0</span>, <span class="number">0</span>, <span class="number">15</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">5</span>,
+        </span><span class="number">5</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">15</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
         <span class="comment">// State 13
-        </span><span class="number">0</span>, -<span class="number">7</span>, -<span class="number">7</span>, <span class="number">12</span>, -<span class="number">7</span>, -<span class="number">7</span>, -<span class="number">7</span>,
+        </span>-<span class="number">7</span>, <span class="number">12</span>, -<span class="number">7</span>, -<span class="number">7</span>, <span class="number">0</span>, -<span class="number">7</span>, -<span class="number">7</span>,
         <span class="comment">// State 14
-        </span><span class="number">0</span>, -<span class="number">10</span>, -<span class="number">10</span>, -<span class="number">10</span>, -<span class="number">10</span>, -<span class="number">10</span>, -<span class="number">10</span>,
+        </span>-<span class="number">10</span>, -<span class="number">10</span>, -<span class="number">10</span>, -<span class="number">10</span>, <span class="number">0</span>, -<span class="number">10</span>, -<span class="number">10</span>,
         <span class="comment">// State 15
-        </span><span class="number">0</span>, -<span class="number">6</span>, -<span class="number">6</span>, <span class="number">12</span>, -<span class="number">6</span>, -<span class="number">6</span>, -<span class="number">6</span>,
+        </span>-<span class="number">6</span>, <span class="number">12</span>, -<span class="number">6</span>, -<span class="number">6</span>, <span class="number">0</span>, -<span class="number">6</span>, -<span class="number">6</span>,
         <span class="comment">// State 16
-        </span><span class="number">0</span>, <span class="number">0</span>, <span class="number">18</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">5</span>,
+        </span><span class="number">5</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">18</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
         <span class="comment">// State 17
-        </span><span class="number">0</span>, -<span class="number">11</span>, -<span class="number">11</span>, -<span class="number">11</span>, -<span class="number">11</span>, -<span class="number">11</span>, -<span class="number">11</span>,
+        </span>-<span class="number">11</span>, -<span class="number">11</span>, -<span class="number">11</span>, -<span class="number">11</span>, <span class="number">0</span>, -<span class="number">11</span>, -<span class="number">11</span>,
     ];
     <span class="kw">fn </span>__action(state: i8, integer: usize) -&gt; i8 {
         __ACTION[(state <span class="kw">as </span>usize) * <span class="number">7 </span>+ integer]
@@ -4956,13 +4959,13 @@
         }
     }
     <span class="kw">const </span>__TERMINAL: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>str] = <span class="kw-2">&amp;</span>[
-        <span class="string">r###""!""###</span>,
+        <span class="string">r###""|""###</span>,
+        <span class="string">r###""?""###</span>,
         <span class="string">r###""(""###</span>,
         <span class="string">r###"")""###</span>,
-        <span class="string">r###""?""###</span>,
+        <span class="string">r###""!""###</span>,
         <span class="string">r###""digit""###</span>,
         <span class="string">r###""literal""###</span>,
-        <span class="string">r###""|""###</span>,
     ];
     <span class="kw">fn </span>__expected_tokens(__state: i8) -&gt; alloc::vec::Vec&lt;alloc::string::String&gt; {
         __TERMINAL.iter().enumerate().filter_map(|(index, terminal)| {
@@ -5093,14 +5096,15 @@
         <span class="kw">_</span>: core::marker::PhantomData&lt;()&gt;,
     ) -&gt; <span class="prelude-ty">Option</span>&lt;usize&gt;
     {
-        <span class="kw">match </span><span class="kw-2">*</span>__token {
-            lexer::Tok::Exclam <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">0</span>),
-            lexer::Tok::LParen <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">1</span>),
-            lexer::Tok::RParen <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">2</span>),
-            lexer::Tok::QMark <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">3</span>),
-            lexer::Tok::Digit <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">4</span>),
-            lexer::Tok::Byte { b: <span class="kw">_</span>, .. } <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">5</span>),
-            lexer::Tok::Or <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">6</span>),
+        <span class="attr">#[warn(unused_variables)]
+        </span><span class="kw">match </span>__token {
+            lexer::Tok::Or <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">0</span>),
+            lexer::Tok::QMark <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">1</span>),
+            lexer::Tok::LParen <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">2</span>),
+            lexer::Tok::RParen <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">3</span>),
+            lexer::Tok::Exclam <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">4</span>),
+            lexer::Tok::Digit <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">5</span>),
+            lexer::Tok::Byte { b: <span class="kw">_</span>, .. } <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">6</span>),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
         }
     }
@@ -5112,8 +5116,8 @@
     ) -&gt; __Symbol&lt;&gt;
     {
         <span class="attr">#[allow(clippy::manual_range_patterns)]</span><span class="kw">match </span>__token_index {
-            <span class="number">0 </span>| <span class="number">1 </span>| <span class="number">2 </span>| <span class="number">3 </span>| <span class="number">4 </span>| <span class="number">6 </span>=&gt; __Symbol::Variant0(__token),
-            <span class="number">5 </span>=&gt; <span class="kw">match </span>__token {
+            <span class="number">0 </span>| <span class="number">1 </span>| <span class="number">2 </span>| <span class="number">3 </span>| <span class="number">4 </span>| <span class="number">5 </span>=&gt; __Symbol::Variant0(__token),
+            <span class="number">6 </span>=&gt; <span class="kw">match </span>__token {
                 lexer::Tok::Byte { b: __tok0, .. } <span class="kw">if </span><span class="bool-val">true </span>=&gt; __Symbol::Variant1(__tok0),
                 <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
             },
@@ -5610,7 +5614,7 @@
 </span><span class="kw">pub use </span><span class="self">self</span>::__parse__Ast2::Ast2Parser;
 
 <span class="attr">#[rustfmt::skip]
-#[allow(non_snake_case, non_camel_case_types, unused_mut, unused_variables, unused_imports, unused_parens, clippy::needless_lifetimes, clippy::type_complexity, clippy::needless_return, clippy::too_many_arguments, clippy::never_loop, clippy::match_single_binding, clippy::needless_raw_string_hashes)]
+#[allow(explicit_outlives_requirements, non_snake_case, non_camel_case_types, unused_mut, unused_variables, unused_imports, unused_parens, clippy::needless_lifetimes, clippy::type_complexity, clippy::needless_return, clippy::too_many_arguments, clippy::never_loop, clippy::match_single_binding, clippy::needless_raw_string_hashes)]
 </span><span class="kw">mod </span>__parse__Ast3 {
 
     <span class="kw">use </span><span class="kw">crate</span>::parser::{lexer, ast, Error};
@@ -5620,8 +5624,8 @@
     </span><span class="kw">extern crate </span>lalrpop_util <span class="kw">as </span>__lalrpop_util;
     <span class="attr">#[allow(unused_imports)]
     </span><span class="kw">use </span><span class="self">self</span>::__lalrpop_util::state_machine <span class="kw">as </span>__state_machine;
-    <span class="kw">extern crate </span>core;
-    <span class="kw">extern crate </span>alloc;
+    <span class="attr">#[allow(unused_extern_crates)]
+    </span><span class="kw">extern crate </span>alloc;
     <span class="kw">use </span><span class="kw">super</span>::__ToTriple;
     <span class="attr">#[allow(dead_code)]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">enum </span>__Symbol&lt;&gt;
@@ -5632,41 +5636,41 @@
     }
     <span class="kw">const </span>__ACTION: <span class="kw-2">&amp;</span>[i8] = <span class="kw-2">&amp;</span>[
         <span class="comment">// State 0
-        </span><span class="number">0</span>, <span class="number">3</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">11</span>, <span class="number">12</span>, <span class="number">0</span>,
+        </span><span class="number">0</span>, <span class="number">0</span>, <span class="number">3</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">11</span>, <span class="number">12</span>,
         <span class="comment">// State 1
-        </span><span class="number">0</span>, <span class="number">3</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">11</span>, <span class="number">12</span>, <span class="number">0</span>,
+        </span><span class="number">0</span>, <span class="number">0</span>, <span class="number">3</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">11</span>, <span class="number">12</span>,
         <span class="comment">// State 2
-        </span><span class="number">5</span>, <span class="number">3</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">11</span>, <span class="number">12</span>, <span class="number">0</span>,
+        </span><span class="number">0</span>, <span class="number">0</span>, <span class="number">3</span>, <span class="number">0</span>, <span class="number">5</span>, <span class="number">11</span>, <span class="number">12</span>,
         <span class="comment">// State 3
-        </span><span class="number">0</span>, <span class="number">3</span>, -<span class="number">2</span>, <span class="number">0</span>, <span class="number">11</span>, <span class="number">12</span>, -<span class="number">2</span>,
+        </span>-<span class="number">2</span>, <span class="number">0</span>, <span class="number">3</span>, -<span class="number">2</span>, <span class="number">0</span>, <span class="number">11</span>, <span class="number">12</span>,
         <span class="comment">// State 4
-        </span><span class="number">0</span>, <span class="number">3</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">11</span>, <span class="number">12</span>, <span class="number">0</span>,
+        </span><span class="number">0</span>, <span class="number">0</span>, <span class="number">3</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">11</span>, <span class="number">12</span>,
         <span class="comment">// State 5
-        </span><span class="number">0</span>, <span class="number">3</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">11</span>, <span class="number">12</span>, <span class="number">0</span>,
+        </span><span class="number">0</span>, <span class="number">0</span>, <span class="number">3</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">11</span>, <span class="number">12</span>,
         <span class="comment">// State 6
-        </span><span class="number">0</span>, <span class="number">3</span>, -<span class="number">1</span>, <span class="number">0</span>, <span class="number">11</span>, <span class="number">12</span>, -<span class="number">1</span>,
+        </span>-<span class="number">1</span>, <span class="number">0</span>, <span class="number">3</span>, -<span class="number">1</span>, <span class="number">0</span>, <span class="number">11</span>, <span class="number">12</span>,
         <span class="comment">// State 7
-        </span><span class="number">0</span>, -<span class="number">5</span>, -<span class="number">5</span>, -<span class="number">5</span>, -<span class="number">5</span>, -<span class="number">5</span>, -<span class="number">5</span>,
+        </span>-<span class="number">5</span>, -<span class="number">5</span>, -<span class="number">5</span>, -<span class="number">5</span>, <span class="number">0</span>, -<span class="number">5</span>, -<span class="number">5</span>,
         <span class="comment">// State 8
-        </span><span class="number">0</span>, -<span class="number">7</span>, -<span class="number">7</span>, <span class="number">13</span>, -<span class="number">7</span>, -<span class="number">7</span>, -<span class="number">7</span>,
+        </span>-<span class="number">7</span>, <span class="number">13</span>, -<span class="number">7</span>, -<span class="number">7</span>, <span class="number">0</span>, -<span class="number">7</span>, -<span class="number">7</span>,
         <span class="comment">// State 9
-        </span><span class="number">0</span>, -<span class="number">3</span>, -<span class="number">3</span>, -<span class="number">3</span>, -<span class="number">3</span>, -<span class="number">3</span>, -<span class="number">3</span>,
+        </span>-<span class="number">3</span>, -<span class="number">3</span>, -<span class="number">3</span>, -<span class="number">3</span>, <span class="number">0</span>, -<span class="number">3</span>, -<span class="number">3</span>,
         <span class="comment">// State 10
-        </span><span class="number">0</span>, -<span class="number">9</span>, -<span class="number">9</span>, -<span class="number">9</span>, -<span class="number">9</span>, -<span class="number">9</span>, -<span class="number">9</span>,
+        </span>-<span class="number">9</span>, -<span class="number">9</span>, -<span class="number">9</span>, -<span class="number">9</span>, <span class="number">0</span>, -<span class="number">9</span>, -<span class="number">9</span>,
         <span class="comment">// State 11
-        </span><span class="number">0</span>, -<span class="number">8</span>, -<span class="number">8</span>, -<span class="number">8</span>, -<span class="number">8</span>, -<span class="number">8</span>, -<span class="number">8</span>,
+        </span>-<span class="number">8</span>, -<span class="number">8</span>, -<span class="number">8</span>, -<span class="number">8</span>, <span class="number">0</span>, -<span class="number">8</span>, -<span class="number">8</span>,
         <span class="comment">// State 12
-        </span><span class="number">0</span>, -<span class="number">4</span>, -<span class="number">4</span>, -<span class="number">4</span>, -<span class="number">4</span>, -<span class="number">4</span>, -<span class="number">4</span>,
+        </span>-<span class="number">4</span>, -<span class="number">4</span>, -<span class="number">4</span>, -<span class="number">4</span>, <span class="number">0</span>, -<span class="number">4</span>, -<span class="number">4</span>,
         <span class="comment">// State 13
-        </span><span class="number">0</span>, -<span class="number">6</span>, -<span class="number">6</span>, <span class="number">13</span>, -<span class="number">6</span>, -<span class="number">6</span>, -<span class="number">6</span>,
+        </span>-<span class="number">6</span>, <span class="number">13</span>, -<span class="number">6</span>, -<span class="number">6</span>, <span class="number">0</span>, -<span class="number">6</span>, -<span class="number">6</span>,
         <span class="comment">// State 14
-        </span><span class="number">0</span>, <span class="number">0</span>, <span class="number">16</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">6</span>,
+        </span><span class="number">6</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">16</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
         <span class="comment">// State 15
-        </span><span class="number">0</span>, -<span class="number">10</span>, -<span class="number">10</span>, -<span class="number">10</span>, -<span class="number">10</span>, -<span class="number">10</span>, -<span class="number">10</span>,
+        </span>-<span class="number">10</span>, -<span class="number">10</span>, -<span class="number">10</span>, -<span class="number">10</span>, <span class="number">0</span>, -<span class="number">10</span>, -<span class="number">10</span>,
         <span class="comment">// State 16
-        </span><span class="number">0</span>, <span class="number">0</span>, <span class="number">18</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">6</span>,
+        </span><span class="number">6</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">18</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,
         <span class="comment">// State 17
-        </span><span class="number">0</span>, -<span class="number">11</span>, -<span class="number">11</span>, -<span class="number">11</span>, -<span class="number">11</span>, -<span class="number">11</span>, -<span class="number">11</span>,
+        </span>-<span class="number">11</span>, -<span class="number">11</span>, -<span class="number">11</span>, -<span class="number">11</span>, <span class="number">0</span>, -<span class="number">11</span>, -<span class="number">11</span>,
     ];
     <span class="kw">fn </span>__action(state: i8, integer: usize) -&gt; i8 {
         __ACTION[(state <span class="kw">as </span>usize) * <span class="number">7 </span>+ integer]
@@ -5730,13 +5734,13 @@
         }
     }
     <span class="kw">const </span>__TERMINAL: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>str] = <span class="kw-2">&amp;</span>[
-        <span class="string">r###""!""###</span>,
+        <span class="string">r###""|""###</span>,
+        <span class="string">r###""?""###</span>,
         <span class="string">r###""(""###</span>,
         <span class="string">r###"")""###</span>,
-        <span class="string">r###""?""###</span>,
+        <span class="string">r###""!""###</span>,
         <span class="string">r###""digit""###</span>,
         <span class="string">r###""literal""###</span>,
-        <span class="string">r###""|""###</span>,
     ];
     <span class="kw">fn </span>__expected_tokens(__state: i8) -&gt; alloc::vec::Vec&lt;alloc::string::String&gt; {
         __TERMINAL.iter().enumerate().filter_map(|(index, terminal)| {
@@ -5867,14 +5871,15 @@
         <span class="kw">_</span>: core::marker::PhantomData&lt;()&gt;,
     ) -&gt; <span class="prelude-ty">Option</span>&lt;usize&gt;
     {
-        <span class="kw">match </span><span class="kw-2">*</span>__token {
-            lexer::Tok::Exclam <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">0</span>),
-            lexer::Tok::LParen <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">1</span>),
-            lexer::Tok::RParen <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">2</span>),
-            lexer::Tok::QMark <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">3</span>),
-            lexer::Tok::Digit <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">4</span>),
-            lexer::Tok::Byte { b: <span class="kw">_</span>, .. } <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">5</span>),
-            lexer::Tok::Or <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">6</span>),
+        <span class="attr">#[warn(unused_variables)]
+        </span><span class="kw">match </span>__token {
+            lexer::Tok::Or <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">0</span>),
+            lexer::Tok::QMark <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">1</span>),
+            lexer::Tok::LParen <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">2</span>),
+            lexer::Tok::RParen <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">3</span>),
+            lexer::Tok::Exclam <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">4</span>),
+            lexer::Tok::Digit <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">5</span>),
+            lexer::Tok::Byte { b: <span class="kw">_</span>, .. } <span class="kw">if </span><span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(<span class="number">6</span>),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
         }
     }
@@ -5886,8 +5891,8 @@
     ) -&gt; __Symbol&lt;&gt;
     {
         <span class="attr">#[allow(clippy::manual_range_patterns)]</span><span class="kw">match </span>__token_index {
-            <span class="number">0 </span>| <span class="number">1 </span>| <span class="number">2 </span>| <span class="number">3 </span>| <span class="number">4 </span>| <span class="number">6 </span>=&gt; __Symbol::Variant0(__token),
-            <span class="number">5 </span>=&gt; <span class="kw">match </span>__token {
+            <span class="number">0 </span>| <span class="number">1 </span>| <span class="number">2 </span>| <span class="number">3 </span>| <span class="number">4 </span>| <span class="number">5 </span>=&gt; __Symbol::Variant0(__token),
+            <span class="number">6 </span>=&gt; <span class="kw">match </span>__token {
                 lexer::Tok::Byte { b: __tok0, .. } <span class="kw">if </span><span class="bool-val">true </span>=&gt; __Symbol::Variant1(__tok0),
                 <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
             },
@@ -6526,26 +6531,23 @@
 {
     Ast::case_sensitive(p)
 }
-<span class="attr">#[allow(clippy::type_complexity, dead_code)]
 
+<span class="attr">#[allow(clippy::type_complexity, dead_code)]
 </span><span class="kw">pub  trait </span>__ToTriple&lt;&gt;
 {
-    <span class="kw">fn </span>to_triple(value: <span class="self">Self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(usize,Tok,usize), __lalrpop_util::ParseError&lt;usize, Tok, Error&gt;&gt;;
+    <span class="kw">fn </span>to_triple(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(usize,Tok,usize), __lalrpop_util::ParseError&lt;usize, Tok, Error&gt;&gt;;
 }
 
 <span class="kw">impl</span>&lt;&gt; __ToTriple&lt;&gt; <span class="kw">for </span>(usize, Tok, usize)
 {
-    <span class="kw">fn </span>to_triple(value: <span class="self">Self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(usize,Tok,usize), __lalrpop_util::ParseError&lt;usize, Tok, Error&gt;&gt; {
-        <span class="prelude-val">Ok</span>(value)
+    <span class="kw">fn </span>to_triple(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(usize,Tok,usize), __lalrpop_util::ParseError&lt;usize, Tok, Error&gt;&gt; {
+        <span class="prelude-val">Ok</span>(<span class="self">self</span>)
     }
 }
 <span class="kw">impl</span>&lt;&gt; __ToTriple&lt;&gt; <span class="kw">for </span><span class="prelude-ty">Result</span>&lt;(usize, Tok, usize), Error&gt;
 {
-    <span class="kw">fn </span>to_triple(value: <span class="self">Self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(usize,Tok,usize), __lalrpop_util::ParseError&lt;usize, Tok, Error&gt;&gt; {
-        <span class="kw">match </span>value {
-            <span class="prelude-val">Ok</span>(v) =&gt; <span class="prelude-val">Ok</span>(v),
-            <span class="prelude-val">Err</span>(error) =&gt; <span class="prelude-val">Err</span>(__lalrpop_util::ParseError::User { error }),
-        }
+    <span class="kw">fn </span>to_triple(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(usize,Tok,usize), __lalrpop_util::ParseError&lt;usize, Tok, Error&gt;&gt; {
+        <span class="self">self</span>.map_err(|error| __lalrpop_util::ParseError::User { error })
     }
 }
 </code></pre></div></section></main></body></html>

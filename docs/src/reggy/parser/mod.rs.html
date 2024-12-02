@@ -131,13 +131,23 @@
 <a href="#131" id="131">131</a>
 <a href="#132" id="132">132</a>
 <a href="#133" id="133">133</a>
+<a href="#134" id="134">134</a>
+<a href="#135" id="135">135</a>
+<a href="#136" id="136">136</a>
+<a href="#137" id="137">137</a>
+<a href="#138" id="138">138</a>
 </pre></div><pre class="rust"><code><span class="kw">mod </span>ast;
 <span class="kw">mod </span>lexer;
 <span class="kw">use </span>lalrpop_util::ParseError;
 
 <span class="kw">pub use </span>ast::Ast;
 
-<span class="macro">lalrpop_util::lalrpop_mod!</span>(<span class="attr">#[allow(clippy::all)] </span><span class="kw">pub </span>grammar, <span class="string">"/parser/grammar.rs"</span>);
+<span class="macro">lalrpop_util::lalrpop_mod!</span>(
+    <span class="attr">#[allow(clippy::ptr_arg)]
+    #[rustfmt::skip]
+    </span><span class="kw">pub </span>grammar,
+    <span class="string">"/parser/grammar.rs"
+</span>);
 
 <span class="attr">#[derive(Debug, Clone, PartialEq)]
 </span><span class="kw">pub enum </span>Error {

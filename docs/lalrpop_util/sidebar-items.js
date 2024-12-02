@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["ParseError"],"macro":["lalrpop_mod"],"mod":["state_machine"],"struct":["ErrorRecovery"]};

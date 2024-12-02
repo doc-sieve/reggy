@@ -4,7 +4,12 @@ use lalrpop_util::ParseError;
 
 pub use ast::Ast;
 
-lalrpop_util::lalrpop_mod!(#[allow(clippy::all)] pub grammar, "/parser/grammar.rs");
+lalrpop_util::lalrpop_mod!(
+    #[allow(clippy::ptr_arg)]
+    #[rustfmt::skip]
+    pub grammar,
+    "/parser/grammar.rs"
+);
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Error {
