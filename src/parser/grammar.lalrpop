@@ -8,7 +8,7 @@ pub Ast: ast::Ast = {
     #[precedence(level="1")]
     <t: Term> => t,
     #[precedence(level="2")] #[assoc(side="right")]
-    <t: Ast> "?" => Ast::zero_or_one(t),
+    <t: Ast> "?" => Ast::optional(t),
     #[precedence(level="3")] #[assoc(side="left")]
     <lhs: Ast> <rhs: Ast> => Ast::then(lhs, rhs),
     #[precedence(level="4")] #[assoc(side="left")]
@@ -16,8 +16,9 @@ pub Ast: ast::Ast = {
 }
 
 Term: ast::Ast = {
-    <l: "literal"> => Ast::byte(l),
+    <c: "char"> => Ast::char(c),
     <"digit"> => Ast::digit(),
+    <" "> => Ast::space(),
     "(" <p: Ast> ")" => p,
     "(" "!" <p: Ast> ")" => Ast::case_sensitive(p)
 }
@@ -32,7 +33,8 @@ extern {
         "(" => lexer::Tok::LParen,
         ")" => lexer::Tok::RParen,
         "!" => lexer::Tok::Exclam,
+        "char" => lexer::Tok::Char { c: <char>, .. },
         "digit" => lexer::Tok::Digit,
-        "literal" => lexer::Tok::Byte { b: <u8>, .. },
+        " " => lexer::Tok::Space,
     }
 }

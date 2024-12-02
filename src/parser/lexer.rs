@@ -1,6 +1,9 @@
+use std::str::Chars;
+
 #[derive(Debug, Clone)]
 pub enum Tok {
-    Byte { b: u8, escaped: bool },
+    Char { c: char, escaped: bool },
+    Space,
     Digit,
     Or,
     QMark,
@@ -17,10 +20,17 @@ pub struct Token {
 }
 
 impl Token {
-    fn byte(start: usize, b: u8, escaped: bool) -> Self {
+    fn char(start: usize, c: char, escaped: bool) -> Self {
         Self {
             start,
-            data: Tok::Byte { b, escaped },
+            data: Tok::Char { c, escaped },
+        }
+    }
+
+    fn space(start: usize) -> Self {
+        Self {
+            start,
+            data: Tok::Space,
         }
     }
 
@@ -46,15 +56,15 @@ impl Token {
         }
     }
 
-    fn reserved(start: usize, b: u8) -> Option<Self> {
+    fn reserved(start: usize, c: char) -> Option<Self> {
         Some(Self {
             start,
-            data: match b {
-                b'|' => Tok::Or,
-                b'?' => Tok::QMark,
-                b'(' => Tok::LParen,
-                b')' => Tok::RParen,
-                b'!' => Tok::Exclam,
+            data: match c {
+                '|' => Tok::Or,
+                '?' => Tok::QMark,
+                '(' => Tok::LParen,
+                ')' => Tok::RParen,
+                '!' => Tok::Exclam,
                 _ => return None,
             },
         })
@@ -62,7 +72,7 @@ impl Token {
 
     pub fn bounds(&self) -> (usize, usize) {
         match &self.data {
-            Tok::Byte { escaped: true, .. } => (self.start, self.start + 2),
+            Tok::Char { escaped: true, .. } => (self.start, self.start + 2),
             Tok::Digit => (self.start, self.start + 2),
             _ => (self.start, self.start + 1),
         }
@@ -70,7 +80,7 @@ impl Token {
 }
 
 pub struct Lexer<'a> {
-    code: &'a str,
+    code: Chars<'a>,
     i: usize,
     escape: bool,
 }
@@ -78,7 +88,7 @@ pub struct Lexer<'a> {
 impl<'a> Lexer<'a> {
     pub fn new(code: &'a str) -> Self {
         Self {
-            code,
+            code: code.chars(),
             i: 0,
             escape: false,
         }
@@ -89,36 +99,24 @@ impl<'a> Iterator for Lexer<'a> {
     type Item = Token;
 
     fn next(&mut self) -> Option<Self::Item> {
-        while self.i < self.code.len() {
-            let byte = self.code.as_bytes()[self.i];
-            if !self.code.is_char_boundary(self.i) {
-                if self.escape {
-                    self.escape = false;
-                    self.i += 1;
-                    return Some(Token::error(self.i - 1, super::Error::UnnecessaryEscape));
-                } else {
-                    self.i += 1;
-                    return Some(Token::byte(self.i - 1, byte, false));
-                }
-            }
-
-            match Token::reserved(self.i, byte) {
+        for c in self.code.by_ref() {
+            match Token::reserved(self.i, c) {
                 Some(tok) => {
                     if self.escape {
                         self.escape = false;
                         self.i += 1;
-                        return Some(Token::byte(self.i - 1, byte, true));
+                        return Some(Token::char(self.i - 1, c, true));
                     } else {
                         self.i += 1;
                         return Some(tok);
                     }
                 }
                 None => {
-                    if byte == b'\\' {
+                    if c == '\\' {
                         if self.escape {
                             self.escape = false;
                             self.i += 1;
-                            return Some(Token::byte(self.i - 1, byte, true));
+                            return Some(Token::char(self.i - 1, c, true));
                         } else {
                             self.escape = true;
                             self.i += 1;
@@ -128,13 +126,16 @@ impl<'a> Iterator for Lexer<'a> {
                         self.escape = false;
                         self.i += 1;
 
-                        return match byte {
-                            b'd' => Some(Token::digit(self.i - 1)),
+                        return match c {
+                            'd' => Some(Token::digit(self.i - 1)),
                             _ => Some(Token::error(self.i - 2, super::Error::UnnecessaryEscape)),
                         };
                     } else {
                         self.i += 1;
-                        return Some(Token::byte(self.i, byte, false));
+                        return match c {
+                            ' ' => Some(Token::space(self.i)),
+                            _ => Some(Token::char(self.i, c, false)),
+                        };
                     }
                 }
             }
