@@ -1,6 +1,8 @@
 # Reggy
 
-Friendly regular expressions for text analytics. Typical regex features are removed/adjusted to make natural language queries easier and to strictly limit memory/runtime. Able to match streaming text.
+Friendly regular expressions for text analytics. Typical regex features are removed/adjusted to make natural language queries easier and to strictly limit memory/runtime. Able to match streaming text. 
+
+[API Docs](https://doc-sieve.github.io/reggy)
 
 ## Pattern Language
 
