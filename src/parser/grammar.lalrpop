@@ -1,0 +1,38 @@
+use crate::parser::{lexer, ast, Error};
+use lexer::Tok;
+use ast::Ast;
+
+grammar();
+
+pub Ast: ast::Ast = {
+    #[precedence(level="1")]
+    <t: Term> => t,
+    #[precedence(level="2")] #[assoc(side="right")]
+    <t: Ast> "?" => Ast::zero_or_one(t),
+    #[precedence(level="3")] #[assoc(side="left")]
+    <lhs: Ast> <rhs: Ast> => Ast::then(lhs, rhs),
+    #[precedence(level="4")] #[assoc(side="left")]
+    <lhs: Ast> "|" <rhs: Ast> => Ast::or(lhs, rhs),
+}
+
+Term: ast::Ast = {
+    <l: "literal"> => Ast::byte(l),
+    <"digit"> => Ast::digit(),
+    "(" <p: Ast> ")" => p,
+    "(" "!" <p: Ast> ")" => Ast::case_sensitive(p)
+}
+
+extern {
+    type Location = usize;
+    type Error = Error;
+
+    enum Tok {
+        "|" => lexer::Tok::Or,
+        "?" => lexer::Tok::QMark,
+        "(" => lexer::Tok::LParen,
+        ")" => lexer::Tok::RParen,
+        "!" => lexer::Tok::Exclam,
+        "digit" => lexer::Tok::Digit,
+        "literal" => lexer::Tok::Byte { b: <u8>, .. },
+    }
+}

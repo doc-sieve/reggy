@@ -1,0 +1,11 @@
+[package]
+name = "reggy"
+version = "0.0.1"
+edition = "2021"
+description = "friendly, resumable regular expressions for text analytics"
+
+[dependencies]
+lalrpop-util = "0.20.2"
+
+[build-dependencies]
+lalrpop = { version = "0.20.2", default-features = false }
