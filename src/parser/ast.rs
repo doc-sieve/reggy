@@ -8,6 +8,8 @@ pub enum Ast {
     Seq(Vec<Ast>),
     Or(Vec<Ast>),
     Optional(Box<Ast>),
+    ZeroOrMore(Box<Ast>),
+    OneOrMore(Box<Ast>),
     CS(Box<Ast>),
 }
 
@@ -31,6 +33,8 @@ impl Ast {
             Self::Space => true,
             Self::CS(_) => true,
             Self::Optional(inner) => inner.is_cs(),
+            Self::ZeroOrMore(inner) => inner.is_cs(),
+            Self::OneOrMore(inner) => inner.is_cs(),
             Self::Or(inner) => inner.iter().all(|i| i.is_cs()),
             Self::Seq(inner) => inner.iter().all(|i| i.is_cs()),
         }
@@ -70,6 +74,14 @@ impl Ast {
         Self::Optional(Box::new(inner))
     }
 
+    pub(super) fn zero_or_more(inner: Ast) -> Self {
+        Self::ZeroOrMore(Box::new(inner))
+    }
+
+    pub(super) fn one_or_more(inner: Ast) -> Self {
+        Self::OneOrMore(Box::new(inner))
+    }
+
     fn to_regex_inner(&self, cs: bool) -> String {
         match self {
             Self::Seq(inner) => inner
@@ -103,11 +115,35 @@ impl Ast {
                 Self::Space => r"\s*".into(),
                 i => format!("(?:{})?", i.to_regex_inner(cs)),
             },
+            Self::ZeroOrMore(inner) => match inner.as_ref() {
+                Self::Char(c) => {
+                    if is_meta_character(*c) {
+                        format!("\\{c}*")
+                    } else {
+                        format!("{c}*")
+                    }
+                }
+                Self::Digit => r"\d*".into(),
+                Self::Space => r"\s*".into(),
+                i => format!("(?:{})*", i.to_regex_inner(cs)),
+            },
+            Self::OneOrMore(inner) => match inner.as_ref() {
+                Self::Char(c) => {
+                    if is_meta_character(*c) {
+                        format!("\\{c}+")
+                    } else {
+                        format!("{c}+")
+                    }
+                }
+                Self::Digit => r"\d+".into(),
+                Self::Space => r"\s+".into(),
+                i => format!("(?:{})+", i.to_regex_inner(cs)),
+            },
             Self::CS(inner) => {
                 if cs {
-                    format!("(?:{})?", inner.to_regex_inner(true))
+                    format!("(?:{})", inner.to_regex_inner(true))
                 } else {
-                    format!("(?-i:{})?", inner.to_regex_inner(true))
+                    format!("(?-i:{})", inner.to_regex_inner(true))
                 }
             }
         }

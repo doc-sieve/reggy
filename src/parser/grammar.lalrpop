@@ -9,6 +9,8 @@ pub Ast: ast::Ast = {
     <t: Term> => t,
     #[precedence(level="2")] #[assoc(side="right")]
     <t: Ast> "?" => Ast::optional(t),
+    <t: Ast> "*" => Ast::zero_or_more(t),
+    <t: Ast> "+" => Ast::one_or_more(t),
     #[precedence(level="3")] #[assoc(side="left")]
     <lhs: Ast> <rhs: Ast> => Ast::then(lhs, rhs),
     #[precedence(level="4")] #[assoc(side="left")]
@@ -30,6 +32,8 @@ extern {
     enum Tok {
         "|" => lexer::Tok::Or,
         "?" => lexer::Tok::QMark,
+        "*" => lexer::Tok::Star,
+        "+" => lexer::Tok::Plus,
         "(" => lexer::Tok::LParen,
         ")" => lexer::Tok::RParen,
         "!" => lexer::Tok::Exclam,

@@ -1,12 +1,12 @@
 # Reggy
 
-Friendly regular expressions for text analytics. Typical regex features are removed/adjusted to make natural language queries easier and to strictly limit memory/runtime. Able to match streaming text. 
+Friendly regular expressions for text analytics. Typical regex features are removed/adjusted to make natural language queries easier. Able to match streaming text. 
 
 [API Docs](https://doc-sieve.github.io/reggy)
 
 ## Pattern Language
 
-`Reggy` is case-insensitive by default. Spaces match any amount of whitespace (i.e. `\s+`). All the reserved characters mentioned below (`\`, `(`, `)`, `?`, `|`, and `!`) may be escaped with a backslash for a literal match. Patterns are surrounded by implicit word boundaries (i.e. `\b`).
+`Reggy` is case-insensitive by default. Spaces match any amount of whitespace (i.e. `\s+`). All the reserved characters mentioned below (`\`, `(`, `)`, `?`, `|`, `+`, `*`, and `!`) may be escaped with a backslash for a literal match. Patterns are surrounded by implicit unicode word boundaries (i.e. `\b`).
 
 ### Examples
 
@@ -31,3 +31,7 @@ Friendly regular expressions for text analytics. Typical regex features are remo
 *Match digits with `\d`*
 
 `\d.\d\d` matches `3.14`
+
+*Match zero-or-more characters with `*`, or one-or-more characters with `+`*
+
+`$(\d?\d?\d,)*\d?\d?\d.\d\d` matches `$20.66` and `$4,670,055.32`

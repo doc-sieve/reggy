@@ -10,6 +10,8 @@ pub enum Tok {
     LParen,
     RParen,
     Exclam,
+    Star,
+    Plus,
     Error(super::Error),
 }
 
@@ -65,6 +67,8 @@ impl Token {
                 '(' => Tok::LParen,
                 ')' => Tok::RParen,
                 '!' => Tok::Exclam,
+                '+' => Tok::Plus,
+                '*' => Tok::Star,
                 _ => return None,
             },
         })
@@ -105,7 +109,7 @@ impl<'a> Iterator for Lexer<'a> {
                     if self.escape {
                         self.escape = false;
                         self.i += 1;
-                        return Some(Token::char(self.i - 1, c, true));
+                        return Some(Token::char(self.i - 2, c, true));
                     } else {
                         self.i += 1;
                         return Some(tok);
@@ -116,7 +120,7 @@ impl<'a> Iterator for Lexer<'a> {
                         if self.escape {
                             self.escape = false;
                             self.i += 1;
-                            return Some(Token::char(self.i - 1, c, true));
+                            return Some(Token::char(self.i - 2, c, true));
                         } else {
                             self.escape = true;
                             self.i += 1;
@@ -127,7 +131,7 @@ impl<'a> Iterator for Lexer<'a> {
                         self.i += 1;
 
                         return match c {
-                            'd' => Some(Token::digit(self.i - 1)),
+                            'd' => Some(Token::digit(self.i - 2)),
                             _ => Some(Token::error(self.i - 2, super::Error::UnnecessaryEscape)),
                         };
                     } else {
