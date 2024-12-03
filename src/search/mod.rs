@@ -9,7 +9,7 @@ use crate::Ast;
 
 type DFA = dense::DFA<Vec<u32>>;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Match {
     pub pos: (usize, usize),
     pub id: usize,

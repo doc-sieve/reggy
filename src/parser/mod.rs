@@ -1,6 +1,7 @@
 use lalrpop_util::ParseError;
 mod ast;
 mod lexer;
+mod transpile;
 
 pub use ast::Ast;
 

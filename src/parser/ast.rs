@@ -1,5 +1,3 @@
-use regex_syntax::is_meta_character;
-
 #[derive(Debug, PartialEq)]
 pub enum Ast {
     Char(char),
@@ -80,76 +78,5 @@ impl Ast {
 
     pub(super) fn one_or_more(inner: Ast) -> Self {
         Self::OneOrMore(Box::new(inner))
-    }
-
-    fn to_regex_inner(&self, cs: bool) -> String {
-        match self {
-            Self::Seq(inner) => inner
-                .iter()
-                .map(|i| Ast::to_regex_inner(i, cs))
-                .collect::<Vec<_>>()
-                .join(""),
-            Self::Or(inner) => inner
-                .iter()
-                .map(|i| Ast::to_regex_inner(i, cs))
-                .collect::<Vec<_>>()
-                .join("|"),
-            Self::Char(c) => {
-                if is_meta_character(*c) {
-                    format!("\\{c}")
-                } else {
-                    c.to_string()
-                }
-            }
-            Self::Digit => r"\d".into(),
-            Self::Space => r"\s+".into(),
-            Self::Optional(inner) => match inner.as_ref() {
-                Self::Char(c) => {
-                    if is_meta_character(*c) {
-                        format!("\\{c}?")
-                    } else {
-                        format!("{c}?")
-                    }
-                }
-                Self::Digit => r"\d?".into(),
-                Self::Space => r"\s*".into(),
-                i => format!("(?:{})?", i.to_regex_inner(cs)),
-            },
-            Self::ZeroOrMore(inner) => match inner.as_ref() {
-                Self::Char(c) => {
-                    if is_meta_character(*c) {
-                        format!("\\{c}*")
-                    } else {
-                        format!("{c}*")
-                    }
-                }
-                Self::Digit => r"\d*".into(),
-                Self::Space => r"\s*".into(),
-                i => format!("(?:{})*", i.to_regex_inner(cs)),
-            },
-            Self::OneOrMore(inner) => match inner.as_ref() {
-                Self::Char(c) => {
-                    if is_meta_character(*c) {
-                        format!("\\{c}+")
-                    } else {
-                        format!("{c}+")
-                    }
-                }
-                Self::Digit => r"\d+".into(),
-                Self::Space => r"\s+".into(),
-                i => format!("(?:{})+", i.to_regex_inner(cs)),
-            },
-            Self::CS(inner) => {
-                if cs {
-                    format!("(?:{})", inner.to_regex_inner(true))
-                } else {
-                    format!("(?-i:{})", inner.to_regex_inner(true))
-                }
-            }
-        }
-    }
-
-    pub fn to_regex(&self) -> String {
-        format!("(?i:{})", self.to_regex_inner(false))
     }
 }

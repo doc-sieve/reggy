@@ -5,15 +5,18 @@ use ast::Ast;
 grammar();
 
 pub Ast: ast::Ast = {
-    #[precedence(level="1")]
-    <t: Term> => t,
-    #[precedence(level="2")] #[assoc(side="right")]
+    #[precedence(level="0")]
+    Term,
+    
+    #[precedence(level="1")] #[assoc(side="right")]
     <t: Ast> "?" => Ast::optional(t),
     <t: Ast> "*" => Ast::zero_or_more(t),
     <t: Ast> "+" => Ast::one_or_more(t),
-    #[precedence(level="3")] #[assoc(side="left")]
+    
+    #[precedence(level="2")] #[assoc(side="left")]
     <lhs: Ast> <rhs: Ast> => Ast::then(lhs, rhs),
-    #[precedence(level="4")] #[assoc(side="left")]
+    
+    #[precedence(level="3")] #[assoc(side="left")]
     <lhs: Ast> "|" <rhs: Ast> => Ast::or(lhs, rhs),
 }
 
