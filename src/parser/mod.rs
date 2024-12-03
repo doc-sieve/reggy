@@ -43,7 +43,7 @@ impl Ast {
 mod tests {
     use super::{
         Ast,
-        Ast::{CS, Char, Digit, Or, Seq, Optional},
+        Ast::{Char, Digit, Optional, Or, Seq, CS},
     };
 
     #[test]

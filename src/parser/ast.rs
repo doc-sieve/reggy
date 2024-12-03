@@ -22,7 +22,7 @@ impl Ast {
         Self::Space
     }
 
-    pub(super) fn is_cs(&self) -> bool {        
+    pub(super) fn is_cs(&self) -> bool {
         match &self {
             Self::Char(_) => false,
             Self::Digit => true,
@@ -70,8 +70,16 @@ impl Ast {
 
     fn to_regex_inner(&self) -> String {
         match self {
-            Self::Seq(inner) => inner.iter().map(Ast::to_regex_inner).collect::<Vec<_>>().join(""),
-            Self::Or(inner) => inner.iter().map(Ast::to_regex_inner).collect::<Vec<_>>().join("|"),
+            Self::Seq(inner) => inner
+                .iter()
+                .map(Ast::to_regex_inner)
+                .collect::<Vec<_>>()
+                .join(""),
+            Self::Or(inner) => inner
+                .iter()
+                .map(Ast::to_regex_inner)
+                .collect::<Vec<_>>()
+                .join("|"),
             Self::Char(c) => c.to_string(),
             Self::Digit => "\\d".into(),
             Self::Space => "\\s+".into(),
@@ -79,9 +87,9 @@ impl Ast {
                 Self::Char(c) => format!("{c}?"),
                 Self::Digit => "\\d?".into(),
                 Self::Space => "\\s*".into(),
-                i => format!("(?-i:{})?", i.to_regex_inner())
+                i => format!("(?-i:{})?", i.to_regex_inner()),
             },
-            Self::CS(inner) => format!("(?:{})?", inner.to_regex_inner())
+            Self::CS(inner) => format!("(?:{})?", inner.to_regex_inner()),
         }
     }
     pub fn to_regex(&self) -> String {
