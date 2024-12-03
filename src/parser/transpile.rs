@@ -11,7 +11,7 @@ impl Ast {
                 } else {
                     c.to_string()
                 }
-            },
+            }
             Self::Or(inner) => inner
                 .iter()
                 .map(|i| Ast::to_regex_inner(i, cs))
@@ -27,7 +27,7 @@ impl Ast {
                     }
                 }
                 acc
-            },
+            }
             Self::Digit => r"\d".into(),
             Self::Space => r"\s+".into(),
             Self::Optional(inner) => match inner.as_ref() {
@@ -78,5 +78,5 @@ impl Ast {
 
     pub fn to_regex(&self) -> String {
         format!("(?i:{})", self.to_regex_inner(false))
-    }   
+    }
 }

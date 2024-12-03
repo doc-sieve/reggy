@@ -7,7 +7,7 @@ use unicode_segmentation::UnicodeSegmentation;
 
 use crate::Ast;
 
-type DFA = dense::DFA<Vec<u32>>;
+type Dfa = dense::DFA<Vec<u32>>;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Match {
@@ -19,25 +19,25 @@ pub struct Match {
 struct HalfMatch {
     start: usize,
     candidate: Option<Vec<Match>>,
-    id: StateID
+    id: StateID,
 }
 
 impl HalfMatch {
-    fn new(start: usize, dfa: &DFA) -> Self {
+    fn new(start: usize, dfa: &Dfa) -> Self {
         let start_cfg = StartConfig::new().anchored(Anchored::Yes);
         let new_state = dfa.start_state(&start_cfg).unwrap();
 
         Self {
             start,
             candidate: None,
-            id: new_state
+            id: new_state,
         }
     }
 }
 
 #[derive(Debug, Clone)]
 pub struct Search {
-    pub dfa: DFA,
+    pub dfa: Dfa,
     state: Vec<HalfMatch>,
     pos: usize,
 }
@@ -75,12 +75,9 @@ impl Search {
 
         for state_i in 0..self.state.len() {
             let try_finish_state = self.dfa.next_eoi_state(self.state[state_i].id);
-            
+
             if self.dfa.is_match_state(try_finish_state) {
-                let mut candidate = self.state[state_i]
-                    .candidate
-                    .take()
-                    .unwrap_or(vec![]);
+                let mut candidate = self.state[state_i].candidate.take().unwrap_or_default();
 
                 for pattern_i in 0..self.dfa.match_len(try_finish_state) {
                     let pattern_id = self
@@ -100,7 +97,7 @@ impl Search {
                     if !found {
                         candidate.push(Match {
                             pos: (self.state[state_i].start, self.pos),
-                            id: pattern_id
+                            id: pattern_id,
                         })
                     }
                 }
@@ -131,7 +128,7 @@ impl Search {
     }
 
     pub fn finish(&mut self) -> Vec<Match> {
-        std::mem::replace(&mut self.state, vec![])
+        std::mem::take(&mut self.state)
             .iter()
             .flat_map(|s| s.candidate.clone())
             .flatten()
@@ -150,16 +147,9 @@ mod tests {
 
     #[test]
     fn simple_search() {
-        let pattern_strs = [
-            "woz?",
-            "foo( bar)?",
-            "foo b(!aR)"
-        ];
+        let pattern_strs = ["woz?", "foo( bar)?", "foo b(!aR)"];
 
-        let haystacks = [
-            "Foo bar wo foo",
-            " baR woz"
-        ];
+        let haystacks = ["Foo bar wo foo", " baR woz"];
 
         let patterns: Vec<_> = pattern_strs
             .iter()
@@ -175,7 +165,7 @@ mod tests {
                     "\tMatch( pos: {:?}, pattern: \"{}\" )",
                     m.pos, pattern_strs[m.id]
                 )
-            }    
+            }
         }
 
         println!("Finalizing");
