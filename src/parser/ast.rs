@@ -88,20 +88,20 @@ impl Ast {
                 } else {
                     c.to_string()
                 }
-            },
-            Self::Digit => "\\d".into(),
-            Self::Space => "\\s+".into(),
+            }
+            Self::Digit => r"\d".into(),
+            Self::Space => r"\s+".into(),
             Self::Optional(inner) => match inner.as_ref() {
                 Self::Char(c) => {
                     if is_meta_character(*c) {
                         format!("\\{c}?")
                     } else {
                         format!("{c}?")
-                    }    
-                },
-                Self::Digit => "\\d?".into(),
-                Self::Space => "\\s*".into(),
-                i => format!("(:{})?", i.to_regex_inner(cs)),
+                    }
+                }
+                Self::Digit => r"\d?".into(),
+                Self::Space => r"\s*".into(),
+                i => format!("(?:{})?", i.to_regex_inner(cs)),
             },
             Self::CS(inner) => {
                 if cs {
