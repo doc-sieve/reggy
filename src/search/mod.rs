@@ -1,7 +1,7 @@
 use regex_automata::dfa::{dense, Automaton};
 use regex_automata::util::primitives::StateID;
 use regex_automata::util::start::Config as StartConfig;
-use regex_automata::Anchored;
+use regex_automata::{Anchored, MatchKind};
 
 use unicode_segmentation::UnicodeSegmentation;
 
@@ -24,7 +24,8 @@ impl Search {
     pub fn new(patterns: &[Ast]) -> Self {
         let transpiled_patterns = patterns.iter().map(Ast::to_regex).collect::<Vec<_>>();
 
-        let build_cfg = dense::Config::new();
+        let build_cfg = dense::Config::new()
+            .match_kind(MatchKind::All);
 
         let dfa = dense::Builder::new()
             .configure(build_cfg)
@@ -67,7 +68,7 @@ impl Search {
             }
         }
 
-        // self.state.retain(|s| !self.dfa.is_dead_state(s.1));
+        self.state.retain(|s| !self.dfa.is_dead_state(s.1));
 
         matches
     }
@@ -83,10 +84,37 @@ mod tests {
 
     #[test]
     fn simple_search() {
-        let p1 = Ast::parse("woz?").unwrap();
-        let p2 = Ast::parse("foo|bar").unwrap();
-        let p3 = Ast::parse("foo bar").unwrap();
-        let mut m = Search::new(&[p1, p2, p3]);
-        println!("{:?}", m.step("foo bar wo bar woz"));
+        let pattern_strs = [
+            "woz?",
+            "foo b(!aR)",
+            "foo bar"
+        ];
+        
+        let patterns: Vec<_> = pattern_strs.iter().map(|p| Ast::parse(p).unwrap()).collect();
+
+        let mut s = Search::new(&patterns);
+
+
+        let mut haystack = "Foo bar wo foo";
+        
+        println!("---- Matching step \"{haystack}\"");
+        for m in s.step(haystack) {
+            println!(
+                "Match( pos: {:?}, pattern: \"{}\" )",
+                m.pos,
+                pattern_strs[m.id]
+            )
+        }
+
+        haystack = " baR woz";
+        
+        println!("---- Matching step \"{haystack}\"");
+        for m in s.step(haystack) {
+            println!(
+                "Match( pos: {:?}, pattern: \"{}\" )",
+                m.pos,
+                pattern_strs[m.id]
+            )
+        }
     }
 }
