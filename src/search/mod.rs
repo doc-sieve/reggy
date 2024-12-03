@@ -39,8 +39,7 @@ impl Search {
     }
 
     fn step_word(&mut self, haystack: &str) -> Vec<Match> {
-        let new_state = self
-            .dfa
+        let new_state = self.dfa
             .start_state(&StartConfig::new().anchored(Anchored::Yes))
             .unwrap();
 
@@ -54,13 +53,27 @@ impl Search {
 
         self.pos += haystack.len();
 
-        println!("{}", haystack);
+        let mut matches = vec![];
 
-        vec![]
+        for state_i in 0..self.state.len() {
+            let try_finish_state = self.dfa.next_eoi_state(self.state[state_i].1);
+            if self.dfa.is_match_state(try_finish_state) {
+                for pattern_i in 0..self.dfa.match_len(try_finish_state) {
+                    matches.push(Match {
+                        id: self.dfa.match_pattern(try_finish_state, pattern_i).as_usize(),
+                        pos: (self.state[state_i].0, self.pos)
+                    });
+                }
+            }
+        }
+
+        // self.state.retain(|s| !self.dfa.is_dead_state(s.1));
+
+        matches
     }
 
     pub fn step(&mut self, haystack: &str) -> Vec<Match> {
-        haystack.unicode_words().flat_map(|w| self.step_word(w)).collect()
+        haystack.split_word_bounds().flat_map(|w| self.step_word(w)).collect()
     }
 }
 
@@ -70,8 +83,10 @@ mod tests {
 
     #[test]
     fn simple_search() {
-        let p1 = Ast::parse("b").unwrap();
-        let mut m = Search::new(&[p1]);
-        println!("{:?}", m.step("foo; bar"));
+        let p1 = Ast::parse("woz?").unwrap();
+        let p2 = Ast::parse("foo|bar").unwrap();
+        let p3 = Ast::parse("foo bar").unwrap();
+        let mut m = Search::new(&[p1, p2, p3]);
+        println!("{:?}", m.step("foo bar wo bar woz"));
     }
 }

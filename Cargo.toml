@@ -10,6 +10,7 @@ documentation = "https://doc-sieve.github.io/reggy/"
 [dependencies]
 lalrpop-util = "0.22.0"
 regex-automata = "0.4.9"
+regex-syntax = "0.8.5"
 unicode-segmentation = "1.12.0"
 
 [build-dependencies]

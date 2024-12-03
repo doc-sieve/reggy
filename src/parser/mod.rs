@@ -1,6 +1,6 @@
+use lalrpop_util::ParseError;
 mod ast;
 mod lexer;
-use lalrpop_util::ParseError;
 
 pub use ast::Ast;
 

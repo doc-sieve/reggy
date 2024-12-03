@@ -1,3 +1,5 @@
+use regex_syntax::is_meta_character;
+
 #[derive(Debug, PartialEq)]
 pub enum Ast {
     Char(char),
@@ -68,31 +70,50 @@ impl Ast {
         Self::Optional(Box::new(inner))
     }
 
-    fn to_regex_inner(&self) -> String {
+    fn to_regex_inner(&self, cs: bool) -> String {
         match self {
             Self::Seq(inner) => inner
                 .iter()
-                .map(Ast::to_regex_inner)
+                .map(|i| Ast::to_regex_inner(i, cs))
                 .collect::<Vec<_>>()
                 .join(""),
             Self::Or(inner) => inner
                 .iter()
-                .map(Ast::to_regex_inner)
+                .map(|i| Ast::to_regex_inner(i, cs))
                 .collect::<Vec<_>>()
                 .join("|"),
-            Self::Char(c) => c.to_string(),
+            Self::Char(c) => {
+                if is_meta_character(*c) {
+                    format!("\\{c}")
+                } else {
+                    c.to_string()
+                }
+            },
             Self::Digit => "\\d".into(),
             Self::Space => "\\s+".into(),
             Self::Optional(inner) => match inner.as_ref() {
-                Self::Char(c) => format!("{c}?"),
+                Self::Char(c) => {
+                    if is_meta_character(*c) {
+                        format!("\\{c}?")
+                    } else {
+                        format!("{c}?")
+                    }    
+                },
                 Self::Digit => "\\d?".into(),
                 Self::Space => "\\s*".into(),
-                i => format!("(?-i:{})?", i.to_regex_inner()),
+                i => format!("(:{})?", i.to_regex_inner(cs)),
             },
-            Self::CS(inner) => format!("(?:{})?", inner.to_regex_inner()),
+            Self::CS(inner) => {
+                if cs {
+                    format!("(?:{})?", inner.to_regex_inner(true))
+                } else {
+                    format!("(?-i:{})?", inner.to_regex_inner(true))
+                }
+            }
         }
     }
+
     pub fn to_regex(&self) -> String {
-        format!("(?i:{})", self.to_regex_inner())
+        format!("(?i:{})", self.to_regex_inner(false))
     }
 }

@@ -335,6 +335,7 @@ dependencies = [
  "lalrpop",
  "lalrpop-util",
  "regex-automata",
+ "regex-syntax",
  "unicode-segmentation",
 ]
 
