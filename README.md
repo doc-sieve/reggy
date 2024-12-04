@@ -100,12 +100,12 @@ See more in the [API docs](https://doc-sieve.github.io/reggy).
 
 `Reggy` follows greedy matching semantics. A pattern may match after one step of a stream, yet may match a longer form depending on the next step. For example, `ab|abb` will match `s.next("ab")`, but a subsequent call to `s.next("b")` would create a longer match, `"abb"`, which should supercede the match `"ab"`.
 
-`Search` will only return matches once they are definitely complete and cannot be superceded by future `next` calls. Each pattern computes a maximum length `L` (this is why unbound quantifiers are absent from `Reggy`). Once `Reggy` has streamed at most `L` bytes, excluding whitespace, past the start of a match without superceding it, that match will be yielded.
+`Search` only yields matches once they are definitely complete and cannot be superceded by future `next` calls. Each pattern [computes](https://doc-sieve.github.io/reggy/reggy/enum.Ast.html#method.max_bytes) a maximum length `L` (this is why unbound quantifiers are absent from `Reggy`). Once `Reggy` has streamed at most `L` bytes, (counting contiguous whitespace as 1 byte), past the start of a match without superceding it, that match will be yielded.
 
 ## Implementation
 
 The pattern language is parsed with [`lalrpop`](https://lalrpop.github.io/lalrpop) ([grammar](https://github.com/doc-sieve/reggy/blob/main/src/parser/grammar.lalrpop)).
 
-The search routines use a [`regex_automata::dense::DFA`](https://docs.rs/regex-automata/latest/regex_automata/dfa/dense/struct.DFA.html). Compared to other regex engines, the dense DFA is memory-intensive and slow to construct, but searches are fast. All of `Reggy`'s features are supported by the DFA except Unicode word boundaries, which are handled by the [`unicode_segmentation`](https://docs.rs/unicode-segmentation/latest) crate.
+The search routines use a [`regex_automata::dense::DFA`](https://docs.rs/regex-automata/latest/regex_automata/dfa/dense/struct.DFA.html). Compared to other regex engines, the dense DFA is memory-intensive and slow to construct, but searches are fast. Unicode word boundaries are handled by the [`unicode_segmentation`](https://docs.rs/unicode-segmentation/latest) crate.
 
-[^1]: The resulting patterns are equivalent, except that `Reggy` treats any continuous substring of spaces as `\s+` and surrounds patterns with implicit word boundaries.
+[^1]: The resulting patterns are equivalent, except that `Reggy` parses any continuous substring of spaces in the pattern as `\s+`, which is transpiled as ` `, and surrounds patterns with implicit word boundaries, which are not transpiled.

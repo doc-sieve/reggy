@@ -15,16 +15,13 @@ type Dfa = dfa::dense::DFA<Vec<u32>>;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Match {
-    pub id: PatternID,
+    pub id: usize,
     pub span: (usize, usize),
 }
 
 impl Match {
-    pub fn new(id: impl Into<PatternID>, span: (usize, usize)) -> Self {
-        Match {
-            span,
-            id: id.into(),
-        }
+    pub fn new(id: usize, span: (usize, usize)) -> Self {
+        Match { span, id }
     }
 }
 
@@ -53,7 +50,7 @@ impl VisitedWord {
         self.candidate_ends
             .iter()
             .map(|(id, end)| Match {
-                id: *id,
+                id: id.as_usize(),
                 span: (self.start, *end),
             })
             .collect()
@@ -172,7 +169,7 @@ impl Search {
                         self.pattern_max_lens[candidate_pattern.as_usize()];
                     if self.ws_folded_pos - word.ws_folded_start >= max_folded_pattern_len {
                         matches.push(Match {
-                            id: *candidate_pattern,
+                            id: candidate_pattern.as_usize(),
                             span: (word.start, *candidate_pos),
                         });
                         false
@@ -192,6 +189,13 @@ impl Search {
             .as_ref()
             .split_word_bounds()
             .flat_map(|w| self.step_word(w))
+            .collect()
+    }
+
+    pub fn peek_finish(&self) -> Vec<Match> {
+        self.state
+            .iter()
+            .flat_map(VisitedWord::dump)
             .collect()
     }
 
