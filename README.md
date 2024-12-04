@@ -16,7 +16,7 @@ assert_eq!(
 );
 ```
 
-Use the [`Ast`](https://doc-sieve.github.io/reggy/reggy/enum.Ast.html) struct to transpile to [normal](https://docs.rs/regex/) syntax.[^1]
+Use the [`Ast`](https://doc-sieve.github.io/reggy/reggy/enum.Ast.html) struct to transpile to [normal](https://docs.rs/regex/) regex syntax.[^1]
 ```rust
 let ast = Ast::parse(r"do(gg.)?|(!CAT|CAR FAR)").unwrap();
 
@@ -57,7 +57,7 @@ assert_eq!(
 );
 ```
 
-Call `Search::finish` to collect any [not-definitely-complete matches](#definitely-complete-matches) once the stream is closed.
+Call `Search::finish` to collect any not-[definitely-complete matches](#definitely-complete-matches) once the stream is closed.
 ```rust
 assert_eq!(search.finish(), vec![]);
 ```
@@ -108,4 +108,4 @@ The pattern language is parsed with [`lalrpop`](https://lalrpop.github.io/lalrpo
 
 The search routines use a [`regex_automata::dense::DFA`](https://docs.rs/regex-automata/latest/regex_automata/dfa/dense/struct.DFA.html). Compared to other regex engines, the dense DFA is memory-intensive and slow to construct, but searches are fast. All of `Reggy`'s features are supported by the DFA except Unicode word boundaries, which are handled by the [`unicode_segmentation`](https://docs.rs/unicode-segmentation/latest) crate.
 
-[^1]: The resulting pattern will match the `Reggy` pattern, except it will contain ` ` for `\s+` and lack the implicit word boundaries.
+[^1]: The resulting patterns are equivalent, except that `Reggy` treats any continuous substring of spaces as `\s+` and surrounds matches with implicit word boundaries.
