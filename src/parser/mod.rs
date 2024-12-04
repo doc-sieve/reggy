@@ -24,8 +24,8 @@ impl Error {
 }
 
 impl Ast {
-    pub fn parse(code: &str) -> Result<ast::Ast, Error> {
-        let tokens = lexer::Lexer::new(code).map(|tok| {
+    pub fn parse(code: impl AsRef<str>) -> Result<ast::Ast, Error> {
+        let tokens = lexer::Lexer::new(&code).map(|tok| {
             if let Some(err) = tok.get_error() {
                 Err(err)
             } else {
@@ -95,7 +95,7 @@ mod tests {
     #[test]
     fn parse_digits() {
         assert_eq!(
-            Ast::parse(r"\d?.\d\d"),
+            Ast::parse(r"#?.##"),
             Ok(Seq(vec![
                 Optional(Box::new(Digit)),
                 Char('.'),

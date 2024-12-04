@@ -1,9 +1,9 @@
 [package]
 name = "reggy"
 license = "MIT"
-version = "0.0.2"
+version = "0.0.3"
 edition = "2021"
-description = "friendly, resumable regular expressions for text analytics"
+description = "friendly, incremental regular expressions for text analytics"
 repository = "https://github.com/doc-sieve/reggy"
 documentation = "https://doc-sieve.github.io/reggy/"
 

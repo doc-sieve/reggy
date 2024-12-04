@@ -5,7 +5,7 @@ use regex_automata::{Anchored, MatchKind};
 
 use unicode_segmentation::UnicodeSegmentation;
 
-use crate::Ast;
+use crate::{Ast, Error};
 
 type Dfa = dense::DFA<Vec<u32>>;
 
@@ -13,6 +13,12 @@ type Dfa = dense::DFA<Vec<u32>>;
 pub struct Match {
     pub pos: (usize, usize),
     pub id: usize,
+}
+
+impl Match {
+    pub fn new(id: usize, pos: (usize, usize)) -> Self {
+        Match { pos, id }
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -43,6 +49,14 @@ pub struct Search {
 }
 
 impl Search {
+    pub fn compile(patterns: &[impl AsRef<str>]) -> Result<Self, Error> {
+        let mut compiled_patterns = Vec::with_capacity(patterns.len());
+        for pattern in patterns {
+            compiled_patterns.push(Ast::parse(pattern)?);
+        }
+        Ok(Self::new(&compiled_patterns))
+    }
+
     pub fn new(patterns: &[Ast]) -> Self {
         let transpiled_patterns = patterns.iter().map(Ast::to_regex).collect::<Vec<_>>();
 
@@ -120,7 +134,7 @@ impl Search {
         matches
     }
 
-    pub fn step(&mut self, haystack: &str) -> Vec<Match> {
+    pub fn next(&mut self, haystack: &str) -> Vec<Match> {
         haystack
             .split_word_bounds()
             .flat_map(|w| self.step_word(w))
@@ -160,7 +174,7 @@ mod tests {
 
         for haystack in haystacks {
             println!("Matching step \"{haystack}\"");
-            for m in s.step(haystack) {
+            for m in s.next(haystack) {
                 println!(
                     "\tMatch( pos: {:?}, pattern: \"{}\" )",
                     m.pos, pattern_strs[m.id]

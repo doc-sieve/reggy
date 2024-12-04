@@ -36,13 +36,6 @@ impl Token {
         }
     }
 
-    fn digit(start: usize) -> Self {
-        Self {
-            start,
-            data: Tok::Digit,
-        }
-    }
-
     fn error(start: usize, error: super::Error) -> Self {
         Self {
             start,
@@ -69,6 +62,7 @@ impl Token {
                 '!' => Tok::Exclam,
                 '+' => Tok::Plus,
                 '*' => Tok::Star,
+                '#' => Tok::Digit,
                 _ => return None,
             },
         })
@@ -90,9 +84,9 @@ pub struct Lexer<'a> {
 }
 
 impl<'a> Lexer<'a> {
-    pub fn new(code: &'a str) -> Self {
+    pub fn new(code: &'a impl AsRef<str>) -> Self {
         Self {
-            code: code.chars(),
+            code: code.as_ref().chars(),
             i: 0,
             escape: false,
         }
@@ -130,10 +124,7 @@ impl<'a> Iterator for Lexer<'a> {
                         self.escape = false;
                         self.i += 1;
 
-                        return match c {
-                            'd' => Some(Token::digit(self.i - 2)),
-                            _ => Some(Token::error(self.i - 2, super::Error::UnnecessaryEscape)),
-                        };
+                        return Some(Token::error(self.i - 2, super::Error::UnnecessaryEscape));
                     } else {
                         self.i += 1;
                         return match c {
