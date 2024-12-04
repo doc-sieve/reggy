@@ -16,7 +16,7 @@ assert_eq!(
 );
 ```
 
-Use the [`Ast`](https://doc-sieve.github.io/reggy/reggy/enum.Ast.html) struct to transpile to [normal](https://docs.rs/regex/) syntax. The resulting pattern will match the `Reggy` pattern, except it will contain ` ` for `\s+` and lack the implicit word boundaries.
+Use the [`Ast`](https://doc-sieve.github.io/reggy/reggy/enum.Ast.html) struct to transpile to [normal](https://docs.rs/regex/) syntax.[^1]
 ```rust
 let ast = Ast::parse(r"do(gg.)?|(!CAT|CAR FAR)").unwrap();
 
@@ -107,3 +107,5 @@ See more in the [API docs](https://doc-sieve.github.io/reggy).
 The pattern language is parsed with [`lalrpop`](https://lalrpop.github.io/lalrpop) ([grammar](https://github.com/doc-sieve/reggy/blob/main/src/parser/grammar.lalrpop)).
 
 The search routines use a [`regex_automata::dense::DFA`](https://docs.rs/regex-automata/latest/regex_automata/dfa/dense/struct.DFA.html). Compared to other regex engines, the dense DFA is memory-intensive and slow to construct, but searches are fast. All of `Reggy`'s features are supported by the DFA except Unicode word boundaries, which are handled by the [`unicode_segmentation`](https://docs.rs/unicode-segmentation/latest) crate.
+
+[^1]: The resulting pattern will match the `Reggy` pattern, except it will contain ` ` for `\s+` and lack the implicit word boundaries.
