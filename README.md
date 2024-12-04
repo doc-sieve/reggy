@@ -94,7 +94,7 @@ See more in the [API docs](https://doc-sieve.github.io/reggy).
 
 ## Unicode, Stream, and Multi-Pattern Semantics
 
-`Reggy` operates on Unicode scalar values. Stream search `next` boundaries are treated as zero-width word boundaries.
+`Reggy` operates on Unicode scalar values. When searching a stream, `next` step boundaries are treated as zero-width word boundaries.
 
 ### Definitely-Complete Matches
 
@@ -108,4 +108,4 @@ The pattern language is parsed with [`lalrpop`](https://lalrpop.github.io/lalrpo
 
 The search routines use a [`regex_automata::dense::DFA`](https://docs.rs/regex-automata/latest/regex_automata/dfa/dense/struct.DFA.html). Compared to other regex engines, the dense DFA is memory-intensive and slow to construct, but searches are fast. All of `Reggy`'s features are supported by the DFA except Unicode word boundaries, which are handled by the [`unicode_segmentation`](https://docs.rs/unicode-segmentation/latest) crate.
 
-[^1]: The resulting patterns are equivalent, except that `Reggy` treats any continuous substring of spaces as `\s+` and surrounds matches with implicit word boundaries.
+[^1]: The resulting patterns are equivalent, except that `Reggy` treats any continuous substring of spaces as `\s+` and surrounds patterns with implicit word boundaries.
