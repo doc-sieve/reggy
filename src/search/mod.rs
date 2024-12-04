@@ -85,6 +85,8 @@ impl Search {
 
         self.pos += haystack.len();
 
+        println!("\tPre State {:?}", self.state);
+
         let mut matches: Vec<Match> = vec![];
 
         for state_i in 0..self.state.len() {
@@ -92,7 +94,6 @@ impl Search {
 
             if self.dfa.is_match_state(try_finish_state) {
                 let mut candidate = self.state[state_i].candidate.take().unwrap_or_default();
-
                 for pattern_i in 0..self.dfa.match_len(try_finish_state) {
                     let pattern_id = self
                         .dfa
@@ -120,6 +121,8 @@ impl Search {
             }
         }
 
+        println!("\tPost State {:?}", self.state);
+
         self.state.retain(|state| {
             if self.dfa.is_dead_state(state.id) {
                 if let Some(candidate) = &state.candidate {
@@ -127,9 +130,12 @@ impl Search {
                 }
                 false
             } else {
+                println!("\t{:?} is not dead", state.id);
                 true
             }
         });
+
+        println!("\tClean State {:?}", self.state);
 
         matches
     }
@@ -157,37 +163,23 @@ impl Search {
 
 #[cfg(test)]
 mod tests {
-    use super::{Ast, Search};
+    use super::Search;
 
     #[test]
-    fn simple_search() {
-        let pattern_strs = ["woz?", "foo( bar)?", "foo b(!aR)"];
-
-        let haystacks = ["Foo bar wo foo", " baR woz"];
-
-        let patterns: Vec<_> = pattern_strs
-            .iter()
-            .map(|p| Ast::parse(p).unwrap())
-            .collect();
-
-        let mut s = Search::new(&patterns);
+    fn definitely_complete() {
+        let mut s = Search::compile(&["ab"]).unwrap();
+        let haystacks = ["a", "b"];
 
         for haystack in haystacks {
             println!("Matching step \"{haystack}\"");
             for m in s.next(haystack) {
-                println!(
-                    "\tMatch( pos: {:?}, pattern: \"{}\" )",
-                    m.pos, pattern_strs[m.id]
-                )
+                println!("\t{:?}", m);
             }
         }
 
         println!("Finalizing");
         for m in s.finish() {
-            println!(
-                "\tMatch( pos: {:?}, pattern: \"{}\" )",
-                m.pos, pattern_strs[m.id]
-            )
+            println!("\t{:?}", m);
         }
     }
 }

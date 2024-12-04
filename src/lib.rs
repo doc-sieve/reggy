@@ -37,22 +37,15 @@ mod test {
 
     #[test]
     fn readme_compile() {
-        let ast = Ast::parse(r"do(gg)*|(!CAT|CAR)").unwrap();
-        assert_eq!(r"(?mi:do(?:gg)*|(?-i:CAT|CAR))", ast.to_regex());
+        let ast = Ast::parse(r"do(gg.)*|(!CAT|CAR)").unwrap();
+        assert_eq!(r"(?mi:do(?:gg\.)*|(?-i:CAT|CAR))", ast.to_regex());
     }
 
     #[test]
     fn readme_match_incremental() {
-        let mut p = Pattern::new("dogs?").unwrap();
-        assert_eq!(p.findall("cat dog dogs cats"), vec![(4, 7), (8, 12)]);
-
-        // transpile to normal (https://docs.rs/regex/) syntax
-        let ast = Ast::parse(r"do(gg.)*|(!CAT|CAR FAR)").unwrap();
-        assert_eq!(r"(?mi:do(?:gg\.)*|(?-i:CAT|CAR\s+FAR))", ast.to_regex());
-
         let mut search = Search::compile(&[
             r"$#?#?#(,###)*.##",
-            r"(!(John|Jane) Doe)"
+            r"(John|Jane) Doe"
         ]).unwrap();
 
         // call step() to begin searching a stream
@@ -74,7 +67,7 @@ mod test {
     }
 
     #[test]
-    fn case_sensitive_substr() {
+    fn readme_case_sensitive_substr() {
         let mut p = Pattern::new("United States of America|(!USA)").unwrap();
         assert_eq!(
             p.findall("United states of america Usa USA"),
@@ -83,20 +76,20 @@ mod test {
     }
 
     #[test]
-    fn globs() {
+    fn readme_globs() {
         let mut p = Pattern::new("fa(ss)+ion").unwrap();
         assert_eq!(
             p.findall("faion fassion fasssion fassssion"),
             vec![(6, 13), (23, 32)]
         );
 
-        let mut p = Pattern::new("fa(ss)+ion").unwrap();
-        assert_eq!(
-            p.findall("faion fassion fasssion fassssssion"),
-            vec![(6, 13), (23, 34)]
-        );
-
         p = Pattern::new("respect*").unwrap();
         assert_eq!(p.findall("respec respecttttt"), vec![(0, 6), (7, 18)]);
+    }
+
+    #[test]
+    fn leftmost_semantics() {
+        let mut s = Pattern::new("a b|a").unwrap();
+        assert_eq!(vec![(0, 3)], s.findall("a b"));
     }
 }

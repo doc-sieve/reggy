@@ -32,7 +32,7 @@ Use the [`Search`](https://doc-sieve.github.io/reggy/reggy/struct.Search.html) s
 ```rust
 let mut search = Search::compile(&[
     r"$#?#?#(,###)*.##",
-    r"(!(John|Jane) Doe)"
+    r"(John|Jane) Doe"
 ]).unwrap();
 ```
 
@@ -61,7 +61,10 @@ assert_eq!(
 Call `Search::finish` to collect any [not-definitely-complete matches](#definitely-complete-matches) once the stream is closed.
 ```rust
 let money_match_2 = Match::new(0, (49, 56));
-assert_eq!(search.finish(), vec![money_match_2]);
+assert_eq!(
+    search.finish(),
+    vec![money_match_2]
+);
 ```
 
 See more in the [API docs](https://doc-sieve.github.io/reggy).
@@ -106,7 +109,7 @@ See more in the [API docs](https://doc-sieve.github.io/reggy).
 
 ### Definitely-Complete Matches
 
-A pattern may match after one step of a stream, yet may match a longer form depending on the next step. For example, `ab*` will match `s.step("abb")`, but a subsequent call to `s.step("b")` would create a longer match, `"abbb"`, on the same pattern which should supercede the match `"abb"`.
+`Reggy` follows "leftmost longest" (POSIX-style) matching semantics, including for streams. A pattern may match after one step of a stream, yet may match a longer form depending on the next step. For example, `ab*` will match `s.step("abb")`, but a subsequent call to `s.step("b")` would create a longer match, `"abbb"`, which should supercede the match `"abb"`.
 
 `Reggy` will only return matches once they are definitely complete and cannot be superceded by future calls to `Search::step`.
 
