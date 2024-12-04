@@ -1,51 +1,73 @@
-use regex_automata::dfa::{dense, Automaton};
-use regex_automata::util::primitives::StateID;
-use regex_automata::util::start::Config as StartConfig;
-use regex_automata::{Anchored, MatchKind};
+use std::collections::HashMap;
+
+use regex_automata::util::{
+    start::Config as StartConfig,
+    primitives::{StateID, PatternID}
+};
+use regex_automata::dfa::Automaton;
+use regex_automata::{dfa, MatchKind, Anchored};
 
 use unicode_segmentation::UnicodeSegmentation;
 
 use crate::{Ast, Error};
 
-type Dfa = dense::DFA<Vec<u32>>;
+type Dfa = dfa::dense::DFA<Vec<u32>>;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Match {
-    pub pos: (usize, usize),
-    pub id: usize,
+    pub id: PatternID,
+    pub span: (usize, usize),
 }
 
 impl Match {
-    pub fn new(id: usize, pos: (usize, usize)) -> Self {
-        Match { pos, id }
+    pub fn new(id: impl Into<PatternID>, span: (usize, usize)) -> Self {
+        Match { span, id: id.into() }
     }
 }
 
 #[derive(Debug, Clone)]
-struct HalfMatch {
+struct Word {
     start: usize,
-    candidate: Option<Vec<Match>>,
-    id: StateID,
+    state: StateID,
+    candidate_ends: HashMap<PatternID, usize>
 }
 
-impl HalfMatch {
+impl Word {
     fn new(start: usize, dfa: &Dfa) -> Self {
         let start_cfg = StartConfig::new().anchored(Anchored::Yes);
         let new_state = dfa.start_state(&start_cfg).unwrap();
 
         Self {
             start,
-            candidate: None,
-            id: new_state,
+            state: new_state,
+            candidate_ends: HashMap::default(),
         }
+    }
+
+    fn dump(&self) -> Vec<Match> {
+        self.candidate_ends.iter().map(|(id, end)| Match {
+            id: *id,
+            span: (self.start, *end)
+        }).collect()
+    }
+}
+
+fn dfa_matches_at(dfa: &Dfa, id: StateID) -> Vec<PatternID> {
+    let try_end = dfa.next_eoi_state(id);
+    if dfa.is_match_state(try_end) {
+        (0..dfa.match_len(try_end))
+            .map(|pid| dfa.match_pattern(id, pid))
+            .collect()
+    } else {
+        vec![]
     }
 }
 
 #[derive(Debug, Clone)]
 pub struct Search {
     pub dfa: Dfa,
-    state: Vec<HalfMatch>,
     pos: usize,
+    state: Vec<Word>
 }
 
 impl Search {
@@ -60,88 +82,27 @@ impl Search {
     pub fn new(patterns: &[Ast]) -> Self {
         let transpiled_patterns = patterns.iter().map(Ast::to_regex).collect::<Vec<_>>();
 
-        let build_cfg = dense::Config::new().match_kind(MatchKind::All);
+        let build_cfg = dfa::dense::Config::new().match_kind(MatchKind::All);
 
-        let dfa = dense::Builder::new()
+        let dfa = dfa::dense::Builder::new()
             .configure(build_cfg)
             .build_many(&transpiled_patterns)
             .unwrap();
 
         Self {
             dfa,
-            state: vec![],
             pos: 0,
+            state: vec![]
         }
     }
 
     fn step_word(&mut self, haystack: &str) -> Vec<Match> {
-        self.state.push(HalfMatch::new(self.pos, &self.dfa));
-
-        for &b in haystack.as_bytes() {
-            for state_i in 0..self.state.len() {
-                self.state[state_i].id = self.dfa.next_state(self.state[state_i].id, b);
-            }
-        }
-
-        self.pos += haystack.len();
-
-        println!("\tPre State {:?}", self.state);
-
-        let mut matches: Vec<Match> = vec![];
-
-        for state_i in 0..self.state.len() {
-            let try_finish_state = self.dfa.next_eoi_state(self.state[state_i].id);
-
-            if self.dfa.is_match_state(try_finish_state) {
-                let mut candidate = self.state[state_i].candidate.take().unwrap_or_default();
-                for pattern_i in 0..self.dfa.match_len(try_finish_state) {
-                    let pattern_id = self
-                        .dfa
-                        .match_pattern(try_finish_state, pattern_i)
-                        .as_usize();
-
-                    let mut found = false;
-                    for c in &mut candidate {
-                        if c.id == pattern_id {
-                            found = true;
-                            c.pos.1 = self.pos;
-                            break;
-                        }
-                    }
-
-                    if !found {
-                        candidate.push(Match {
-                            pos: (self.state[state_i].start, self.pos),
-                            id: pattern_id,
-                        })
-                    }
-                }
-
-                self.state[state_i].candidate = Some(candidate);
-            }
-        }
-
-        println!("\tPost State {:?}", self.state);
-
-        self.state.retain(|state| {
-            if self.dfa.is_dead_state(state.id) {
-                if let Some(candidate) = &state.candidate {
-                    matches.extend(candidate);
-                }
-                false
-            } else {
-                println!("\t{:?} is not dead", state.id);
-                true
-            }
-        });
-
-        println!("\tClean State {:?}", self.state);
-
-        matches
+        vec![]
     }
 
-    pub fn next(&mut self, haystack: &str) -> Vec<Match> {
+    pub fn next(&mut self, haystack: impl AsRef<str>) -> Vec<Match> {
         haystack
+            .as_ref()
             .split_word_bounds()
             .flat_map(|w| self.step_word(w))
             .collect()
@@ -150,14 +111,13 @@ impl Search {
     pub fn finish(&mut self) -> Vec<Match> {
         std::mem::take(&mut self.state)
             .iter()
-            .flat_map(|s| s.candidate.clone())
-            .flatten()
+            .flat_map(Word::dump)
             .collect()
     }
 
     pub fn reset(&mut self) {
-        self.state = vec![];
         self.pos = 0;
+        self.state.clear();
     }
 }
 
@@ -168,7 +128,7 @@ mod tests {
     #[test]
     fn definitely_complete() {
         let mut s = Search::compile(&["ab"]).unwrap();
-        let haystacks = ["a", "b"];
+        let haystacks = ["a", "b", "a", "b", "a", "b", "c ab", "a", "b", "a", "b"];
 
         for haystack in haystacks {
             println!("Matching step \"{haystack}\"");

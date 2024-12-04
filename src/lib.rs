@@ -18,8 +18,8 @@ impl Pattern {
     }
 
     pub fn findall(&mut self, haystack: &str) -> Vec<(usize, usize)> {
-        let mut res: Vec<_> = self.s.next(haystack).iter().map(|m| m.pos).collect();
-        res.extend(self.s.finish().iter().map(|m| m.pos));
+        let mut res: Vec<_> = self.s.next(haystack).iter().map(|m| m.span).collect();
+        res.extend(self.s.finish().iter().map(|m| m.span));
         self.s.reset();
         res
     }

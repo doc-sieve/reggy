@@ -18,11 +18,11 @@ assert_eq!(
 
 Use the [`Ast`](https://doc-sieve.github.io/reggy/reggy/enum.Ast.html) struct to transpile to [normal](https://docs.rs/regex/) syntax.
 ```rust
-let ast = Ast::parse(r"do(gg.)*|(!CAT|CAR FAR)").unwrap();
+let ast = Ast::parse(r"do(gg.)?|(!CAT|CAR FAR)").unwrap();
 
 assert_eq!(
     ast.to_regex(),
-    r"(?mi:do(?:gg\.)*|(?-i:CAT|CAR\s+FAR))"
+    r"(?mi:do(?:gg\.)?|(?-i:CAT|CAR\s+FAR))"
 );
 ```
 
@@ -71,7 +71,7 @@ See more in the [API docs](https://doc-sieve.github.io/reggy).
 
 ## Pattern Language
 
-`Reggy` is case-insensitive by default. Spaces match any amount of whitespace (i.e. `\s+`). All the reserved characters mentioned below (`\`, `(`, `)`, `?`, `|`, `*`, `+`, `#`, and `!`) may be escaped with a backslash for a literal match. Patterns are surrounded by implicit [unicode word boundaries](https://unicode.org/reports/tr29/) (i.e. `\b`). Empty patterns or subpatterns are not permitted.
+`Reggy` is case-insensitive by default. Spaces match any amount of whitespace (i.e. `\s+`). All the reserved characters mentioned below (`\`, `(`, `)`, `?`, `|`, `#`, and `!`) may be escaped with a backslash for a literal match. Patterns are surrounded by implicit [unicode word boundaries](https://unicode.org/reports/tr29/) (i.e. `\b`). Empty patterns or subpatterns are not permitted.
 
 ### Examples
 
@@ -97,19 +97,13 @@ See more in the [API docs](https://doc-sieve.github.io/reggy).
 
 `#.##` matches `3.14`
 
-*Match zero-or-more times with* `*`*, or one-or-more times with* `+`
-
-`fa(ss)+ion` matches `fassion` and `fassssssion`
-
-`respect*` matches `respec` and `respecttttt`
-
 ## Unicode, Stream, and Multi-Pattern Semantics
 
-`Reggy` operates on Unicode scalar values. Stream search `next` boundaries are treated as zero-width word boundaries. Overlapping matches are supported.
+`Reggy` operates on Unicode scalar values. Stream search `next` boundaries are treated as zero-width word boundaries.
 
 ### Definitely-Complete Matches
 
-`Reggy` follows "leftmost longest" (POSIX-style) matching semantics, including for streams. A pattern may match after one step of a stream, yet may match a longer form depending on the next step. For example, `ab*` will match `s.step("abb")`, but a subsequent call to `s.step("b")` would create a longer match, `"abbb"`, which should supercede the match `"abb"`.
+`Reggy` follows greedy and "leftmost longest" matching semantics, including for streams. A pattern may match after one step of a stream, yet may match a longer form depending on the next step. For example, `ab*` will match `s.step("abb")`, but a subsequent call to `s.step("b")` would create a longer match, `"abbb"`, which should supercede the match `"abb"`.
 
 `Reggy` will only return matches once they are definitely complete and cannot be superceded by future calls to `Search::step`.
 

@@ -6,8 +6,6 @@ pub enum Ast {
     Seq(Vec<Ast>),
     Or(Vec<Ast>),
     Optional(Box<Ast>),
-    ZeroOrMore(Box<Ast>),
-    OneOrMore(Box<Ast>),
     CS(Box<Ast>),
 }
 
@@ -31,8 +29,6 @@ impl Ast {
             Self::Space => true,
             Self::CS(_) => true,
             Self::Optional(inner) => inner.is_cs(),
-            Self::ZeroOrMore(inner) => inner.is_cs(),
-            Self::OneOrMore(inner) => inner.is_cs(),
             Self::Or(inner) => inner.iter().all(|i| i.is_cs()),
             Self::Seq(inner) => inner.iter().all(|i| i.is_cs()),
         }
@@ -70,13 +66,5 @@ impl Ast {
 
     pub(super) fn optional(inner: Ast) -> Self {
         Self::Optional(Box::new(inner))
-    }
-
-    pub(super) fn zero_or_more(inner: Ast) -> Self {
-        Self::ZeroOrMore(Box::new(inner))
-    }
-
-    pub(super) fn one_or_more(inner: Ast) -> Self {
-        Self::OneOrMore(Box::new(inner))
     }
 }

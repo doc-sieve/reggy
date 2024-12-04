@@ -132,8 +132,6 @@ impl Ast {
             }),
 
             Self::Optional(inner) => repetition(inner, re_ast::RepetitionKind::ZeroOrOne, cs),
-            Self::ZeroOrMore(inner) => repetition(inner, re_ast::RepetitionKind::ZeroOrMore, cs),
-            Self::OneOrMore(inner) => repetition(inner, re_ast::RepetitionKind::OneOrMore, cs),
 
             Self::Or(inner) => {
                 let alternation = re_ast::Ast::alternation(re_ast::Alternation {

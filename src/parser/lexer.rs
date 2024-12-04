@@ -10,8 +10,6 @@ pub enum Tok {
     LParen,
     RParen,
     Exclam,
-    Star,
-    Plus,
     Error(super::Error),
 }
 
@@ -60,8 +58,6 @@ impl Token {
                 '(' => Tok::LParen,
                 ')' => Tok::RParen,
                 '!' => Tok::Exclam,
-                '+' => Tok::Plus,
-                '*' => Tok::Star,
                 '#' => Tok::Digit,
                 _ => return None,
             },
