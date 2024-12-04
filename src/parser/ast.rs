@@ -22,7 +22,7 @@ impl Ast {
         Self::Space
     }
 
-    pub(super) fn is_cs(&self) -> bool {
+    fn is_cs(&self) -> bool {
         match &self {
             Self::Char(_) => false,
             Self::Digit => true,
@@ -66,5 +66,17 @@ impl Ast {
 
     pub(super) fn optional(inner: Ast) -> Self {
         Self::Optional(Box::new(inner))
+    }
+
+    pub fn max_bytes(&self) -> usize {
+        match &self {
+            Self::Char(c) => c.len_utf8(),
+            Self::Digit => 1,
+            Self::Space => 1,
+            Self::CS(inner) => inner.max_bytes(),
+            Self::Optional(inner) => inner.max_bytes(),
+            Self::Or(inner) => inner.iter().map(|i| i.max_bytes()).max().unwrap_or(0),
+            Self::Seq(inner) => inner.iter().map(|i| i.max_bytes()).sum(),
+        }
     }
 }

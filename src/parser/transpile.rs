@@ -124,11 +124,16 @@ impl Ast {
 
             Self::Digit => perl_class(re_ast::ClassPerlKind::Digit),
 
-            Self::Space => re_ast::Ast::repetition(re_ast::Repetition {
+            // Self::Space => re_ast::Ast::repetition(re_ast::Repetition {
+            //     span: dummy_span(),
+            //     op: repetition_op(re_ast::RepetitionKind::OneOrMore),
+            //     greedy: true,
+            //     ast: Box::new(perl_class(re_ast::ClassPerlKind::Space)),
+            // }),
+            Self::Space => re_ast::Ast::literal(re_ast::Literal {
                 span: dummy_span(),
-                op: repetition_op(re_ast::RepetitionKind::OneOrMore),
-                greedy: true,
-                ast: Box::new(perl_class(re_ast::ClassPerlKind::Space)),
+                kind: re_ast::LiteralKind::Verbatim,
+                c: ' ',
             }),
 
             Self::Optional(inner) => repetition(inner, re_ast::RepetitionKind::ZeroOrOne, cs),

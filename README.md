@@ -71,7 +71,7 @@ See more in the [API docs](https://doc-sieve.github.io/reggy).
 
 ## Pattern Language
 
-`Reggy` is case-insensitive by default. Spaces match any amount of whitespace (i.e. `\s+`). All the reserved characters mentioned below (`\`, `(`, `)`, `?`, `|`, `#`, and `!`) may be escaped with a backslash for a literal match. Patterns are surrounded by implicit [unicode word boundaries](https://unicode.org/reports/tr29/) (i.e. `\b`). Empty patterns or subpatterns are not permitted.
+`Reggy` is case-insensitive by default. Spaces match any amount of whitespace (i.e. `\s+`). All the reserved characters mentioned below (`\`, `(`, `)`, `?`, `|`, `#`, and `!`) may be escaped with a backslash for a literal match. Patterns are surrounded by implicit [unicode word boundaries](https://unicode.org/reports/tr29) (i.e. `\b`). Empty patterns or subpatterns are not permitted.
 
 ### Examples
 
@@ -103,9 +103,9 @@ See more in the [API docs](https://doc-sieve.github.io/reggy).
 
 ### Definitely-Complete Matches
 
-`Reggy` follows greedy and "leftmost longest" matching semantics, including for streams. A pattern may match after one step of a stream, yet may match a longer form depending on the next step. For example, `ab*` will match `s.step("abb")`, but a subsequent call to `s.step("b")` would create a longer match, `"abbb"`, which should supercede the match `"abb"`.
+`Reggy` follows greedy and "leftmost longest" matching semantics, including for streams. A pattern may match after one step of a stream, yet may match a longer form depending on the next step. For example, `ab|abb` will match `s.step("ab")`, but a subsequent call to `s.step("b")` would create a longer match, `"abb"`, which should supercede the match `"abb"`.
 
-`Reggy` will only return matches once they are definitely complete and cannot be superceded by future calls to `Search::step`.
+`Search` will only return matches once they are definitely complete and cannot be superceded by future `step` calls. It accomplishes this by maintaining a maximum length `L` for each pattern (this is why unbound quantifiers are absent from `Reggy`). Once `Reggy` has streamed at most `L` bytes past the start of a match without superceding it, that match will be yielded.
 
 ## Implementation
 
