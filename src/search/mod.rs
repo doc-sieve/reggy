@@ -80,6 +80,7 @@ pub struct Search {
     dfa: Dfa,
     pos: usize,
     ws_folded_pos: usize,
+    last_word_was_ws: bool,
     state: Vec<VisitedWord>,
     pattern_max_lens: Vec<usize>,
 }
@@ -107,6 +108,7 @@ impl Search {
             dfa,
             pos: 0,
             ws_folded_pos: 0,
+            last_word_was_ws: false,
             state: vec![],
             pattern_max_lens
         }
@@ -114,16 +116,24 @@ impl Search {
 
     fn step_word(&mut self, haystack: &str) -> Vec<Match> {
         let mut matches = vec![];
+        let last_pos = self.pos;
+        let last_ws_folded_pos = self.ws_folded_pos;
 
-        self.state.push(VisitedWord::new(self.pos, self.ws_folded_pos, &self.dfa));
         self.pos += haystack.len();
 
         let curr_word_is_whitespace = word_is_whitespace(haystack);
         if curr_word_is_whitespace {
+            if self.last_word_was_ws {
+                return matches;
+            }
+            self.last_word_was_ws = true;
             self.ws_folded_pos += 1;
         } else {
+            self.last_word_was_ws = false;
             self.ws_folded_pos += haystack.len();
         }
+
+        self.state.push(VisitedWord::new(last_pos, last_ws_folded_pos, &self.dfa));
 
         self.state.retain_mut(|word| {
             if curr_word_is_whitespace {
@@ -199,8 +209,8 @@ mod tests {
 
     #[test]
     fn definitely_complete() {
-        let mut s = Search::compile(&["ab"]).unwrap();
-        let haystacks = ["ab a", "b", "ab"];
+        let mut s = Search::compile(&["a b"]).unwrap();
+        let haystacks = ["ab    a ", "  ", "b", "ab"];
 
         for haystack in haystacks {
             println!("Matching step \"{haystack}\"");
