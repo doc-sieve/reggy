@@ -1,11 +1,11 @@
 use std::collections::HashMap;
 
-use regex_automata::util::{
-    start::Config as StartConfig,
-    primitives::{StateID, PatternID}
-};
 use regex_automata::dfa::Automaton;
-use regex_automata::{dfa, MatchKind, Anchored};
+use regex_automata::util::{
+    primitives::{PatternID, StateID},
+    start::Config as StartConfig,
+};
+use regex_automata::{dfa, Anchored, MatchKind};
 
 use unicode_segmentation::UnicodeSegmentation;
 
@@ -21,7 +21,10 @@ pub struct Match {
 
 impl Match {
     pub fn new(id: impl Into<PatternID>, span: (usize, usize)) -> Self {
-        Match { span, id: id.into() }
+        Match {
+            span,
+            id: id.into(),
+        }
     }
 }
 
@@ -30,7 +33,7 @@ struct VisitedWord {
     start: usize,
     ws_folded_start: usize,
     state: StateID,
-    candidate_ends: HashMap<PatternID, usize>
+    candidate_ends: HashMap<PatternID, usize>,
 }
 
 impl VisitedWord {
@@ -47,10 +50,13 @@ impl VisitedWord {
     }
 
     fn dump(&self) -> Vec<Match> {
-        self.candidate_ends.iter().map(|(id, end)| Match {
-            id: *id,
-            span: (self.start, *end)
-        }).collect()
+        self.candidate_ends
+            .iter()
+            .map(|(id, end)| Match {
+                id: *id,
+                span: (self.start, *end),
+            })
+            .collect()
     }
 }
 
@@ -58,7 +64,7 @@ fn dfa_matches_at(dfa: &Dfa, id: StateID) -> Vec<PatternID> {
     let try_end = dfa.next_eoi_state(id);
     if dfa.is_match_state(try_end) {
         (0..dfa.match_len(try_end))
-            .map(|pid| dfa.match_pattern(id, pid))
+            .map(|pid| dfa.match_pattern(try_end, pid))
             .collect()
     } else {
         vec![]
@@ -67,7 +73,7 @@ fn dfa_matches_at(dfa: &Dfa, id: StateID) -> Vec<PatternID> {
 
 fn word_is_whitespace(word: &str) -> bool {
     for b in word.as_bytes() {
-        if !matches!(b, b' '|b'\t'|b'\n') {
+        if !matches!(b, b' ' | b'\t' | b'\n') {
             return false;
         }
     }
@@ -110,7 +116,7 @@ impl Search {
             ws_folded_pos: 0,
             last_word_was_ws: false,
             state: vec![],
-            pattern_max_lens
+            pattern_max_lens,
         }
     }
 
@@ -122,6 +128,7 @@ impl Search {
         self.pos += haystack.len();
 
         let curr_word_is_whitespace = word_is_whitespace(haystack);
+
         if curr_word_is_whitespace {
             if self.last_word_was_ws {
                 return matches;
@@ -133,7 +140,8 @@ impl Search {
             self.ws_folded_pos += haystack.len();
         }
 
-        self.state.push(VisitedWord::new(last_pos, last_ws_folded_pos, &self.dfa));
+        self.state
+            .push(VisitedWord::new(last_pos, last_ws_folded_pos, &self.dfa));
 
         self.state.retain_mut(|word| {
             if curr_word_is_whitespace {
@@ -158,19 +166,20 @@ impl Search {
                 word.candidate_ends.insert(better, self.pos);
             }
 
-            word.candidate_ends.retain(|candidate_pattern, candidate_pos| {
-                let max_folded_pattern_len = self.pattern_max_lens[candidate_pattern.as_usize()];
-                if self.ws_folded_pos - word.ws_folded_start >= max_folded_pattern_len {
-                    matches.push(Match {
-                        id: *candidate_pattern,
-                        span: (word.start, *candidate_pos)
-                    });
-                    false
-                } else {
-                    true
-                }
-
-            });
+            word.candidate_ends
+                .retain(|candidate_pattern, candidate_pos| {
+                    let max_folded_pattern_len =
+                        self.pattern_max_lens[candidate_pattern.as_usize()];
+                    if self.ws_folded_pos - word.ws_folded_start >= max_folded_pattern_len {
+                        matches.push(Match {
+                            id: *candidate_pattern,
+                            span: (word.start, *candidate_pos),
+                        });
+                        false
+                    } else {
+                        true
+                    }
+                });
 
             true
         });
@@ -205,23 +214,18 @@ impl Search {
 
 #[cfg(test)]
 mod tests {
-    use super::Search;
+    use super::{Match, Search};
 
     #[test]
-    fn definitely_complete() {
+    fn whitespace() {
         let mut s = Search::compile(&["a b"]).unwrap();
-        let haystacks = ["ab    a ", "  ", "b", "ab"];
+        let haystacks = ["ab    a ", " \t", "b", "ab"];
 
-        for haystack in haystacks {
-            println!("Matching step \"{haystack}\"");
-            for m in s.next(haystack) {
-                println!("\t{:?}", m);
-            }
-        }
+        assert_eq!(s.next(&haystacks[0]), vec![]);
+        assert_eq!(s.next(&haystacks[1]), vec![]);
+        assert_eq!(s.next(&haystacks[2]), vec![Match::new(0, (6, 11))]);
 
-        println!("Finalizing");
-        for m in s.finish() {
-            println!("\t{:?}", m);
-        }
+        assert_eq!(s.next(&haystacks[3]), vec![]);
+        assert_eq!(s.finish(), vec![]);
     }
 }

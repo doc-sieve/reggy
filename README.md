@@ -16,13 +16,13 @@ assert_eq!(
 );
 ```
 
-Use the [`Ast`](https://doc-sieve.github.io/reggy/reggy/enum.Ast.html) struct to transpile to [normal](https://docs.rs/regex/) syntax.
+Use the [`Ast`](https://doc-sieve.github.io/reggy/reggy/enum.Ast.html) struct to transpile to [normal](https://docs.rs/regex/) syntax. The resulting pattern will match the `Reggy` pattern, except it will contain ` ` for `\s+` and lack the implicit word boundaries.
 ```rust
 let ast = Ast::parse(r"do(gg.)?|(!CAT|CAR FAR)").unwrap();
 
 assert_eq!(
     ast.to_regex(),
-    r"(?mi:do(?:gg\.)?|(?-i:CAT|CAR\s+FAR))"
+    r"(?mi:do(?:gg\.)?|(?-i:CAT|CAR FAR))"
 );
 ```
 
@@ -31,15 +31,14 @@ assert_eq!(
 Use the [`Search`](https://doc-sieve.github.io/reggy/reggy/struct.Search.html) struct to search a stream with several patterns at once.
 ```rust
 let mut search = Search::compile(&[
-    r"$#?#?#(,###)*.##",
-    r"(John|Jane) Doe"
+    r"$#?#?#.##",
+    r"(John|Jane) Doe",
 ]).unwrap();
 ```
 
 Call `Search::next` to begin searching. It will return [definitely-complete matches](#definitely-complete-matches) immediately.
 ```rust
 let jane_match = Match::new(1, (0, 8));
-
 assert_eq!(
     search.next("Jane Doe paid John"),
     vec![jane_match]
@@ -50,21 +49,17 @@ Call `Search::next` again to continue with the same search state.
 Note that `"John Doe"` matched across the `next` boundary, and spans are relative to the start of the stream.
 ```rust
 let john_match = Match::new(1, (14, 22));
-let money_match_1 = Match::new(0, (23, 37));
-
+let money_match_1 = Match::new(0, (23, 29));
+let money_match_2 = Match::new(0, (41, 48));
 assert_eq!(
-    search.next(" Doe $45,700,000.66 instead of $499.00"),
-    vec![john_match, money_match_1]
+    search.next(" Doe $45.66 instead of $499.00"),
+    vec![john_match, money_match_1, money_match_2]
 );
 ```
 
 Call `Search::finish` to collect any [not-definitely-complete matches](#definitely-complete-matches) once the stream is closed.
 ```rust
-let money_match_2 = Match::new(0, (49, 56));
-assert_eq!(
-    search.finish(),
-    vec![money_match_2]
-);
+assert_eq!(search.finish(), vec![]);
 ```
 
 See more in the [API docs](https://doc-sieve.github.io/reggy).
@@ -103,9 +98,9 @@ See more in the [API docs](https://doc-sieve.github.io/reggy).
 
 ### Definitely-Complete Matches
 
-`Reggy` follows greedy and "leftmost longest" matching semantics, including for streams. A pattern may match after one step of a stream, yet may match a longer form depending on the next step. For example, `ab|abb` will match `s.step("ab")`, but a subsequent call to `s.step("b")` would create a longer match, `"abb"`, which should supercede the match `"abb"`.
+`Reggy` follows greedy matching semantics. A pattern may match after one step of a stream, yet may match a longer form depending on the next step. For example, `ab|abb` will match `s.next("ab")`, but a subsequent call to `s.next("b")` would create a longer match, `"abb"`, which should supercede the match `"ab"`.
 
-`Search` will only return matches once they are definitely complete and cannot be superceded by future `step` calls. It accomplishes this by maintaining a maximum length `L` for each pattern (this is why unbound quantifiers are absent from `Reggy`). Once `Reggy` has streamed at most `L` bytes past the start of a match without superceding it, that match will be yielded.
+`Search` will only return matches once they are definitely complete and cannot be superceded by future `next` calls. Each pattern computes a maximum length `L` (this is why unbound quantifiers are absent from `Reggy`). Once `Reggy` has streamed at most `L` bytes, excluding whitespace, past the start of a match without superceding it, that match will be yielded.
 
 ## Implementation
 
