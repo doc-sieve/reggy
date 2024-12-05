@@ -41,7 +41,6 @@ mod test {
     #[test]
     fn readme_compile() {
         let ast = Ast::parse(r"do(gg.)?|(!CAT|CAR FAR)").unwrap();
-
         assert_eq!(ast.to_regex(), r"(?mi:do(?:gg\.)?|(?-i:CAT|CAR FAR))");
     }
 

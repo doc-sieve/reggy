@@ -9,7 +9,6 @@ A friendly regular expression dialect for text analytics. Typical regex features
 Use the high-level [`Pattern`](https://doc-sieve.github.io/reggy/reggy/struct.Pattern.html) struct for simple search.
 ```rust
 let mut p = Pattern::new("dogs?").unwrap();
-
 assert_eq!(
     p.findall("cat dog dogs cats"),
     vec![(4, 7), (8, 12)]
@@ -19,7 +18,6 @@ assert_eq!(
 Use the [`Ast`](https://doc-sieve.github.io/reggy/reggy/enum.Ast.html) struct to transpile to [normal](https://docs.rs/regex/) regex syntax.[^1]
 ```rust
 let ast = Ast::parse(r"do(gg.)?|(!CAT|CAR FAR)").unwrap();
-
 assert_eq!(
     ast.to_regex(),
     r"(?mi:do(?:gg\.)?|(?-i:CAT|CAR FAR))"
