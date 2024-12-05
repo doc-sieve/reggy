@@ -1,9 +1,12 @@
+#![doc = include_str!("../README.md")]
+
 mod parser;
 mod search;
 
 pub use parser::{Ast, Error};
 pub use search::{Match, Search};
 
+/// A high-level interface for matching a single `reggy` pattern
 #[derive(Clone)]
 pub struct Pattern {
     s: Search,

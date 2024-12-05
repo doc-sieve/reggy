@@ -7,6 +7,7 @@ pub use ast::Ast;
 
 lalrpop_util::lalrpop_mod!(pub grammar, "/parser/grammar.rs");
 
+/// An error raised while parsing a `reggy` pattern
 #[derive(Debug, Clone, PartialEq)]
 pub enum Error {
     ParseError,
@@ -24,6 +25,7 @@ impl Error {
 }
 
 impl Ast {
+    /// Try to parse a string
     pub fn parse(code: impl AsRef<str>) -> Result<ast::Ast, Error> {
         let tokens = lexer::Lexer::new(&code).map(|tok| {
             if let Some(err) = tok.get_error() {
@@ -37,6 +39,19 @@ impl Ast {
         grammar::AstParser::new()
             .parse(tokens)
             .map_err(Error::from_lalrpop)
+    }
+
+    /// Return the maximum number of bytes this pattern can match
+    pub fn max_bytes(&self) -> usize {
+        match &self {
+            Self::Char(c) => c.len_utf8(),
+            Self::Digit => 1,
+            Self::Space => 1,
+            Self::CS(inner) => inner.max_bytes(),
+            Self::Optional(inner) => inner.max_bytes(),
+            Self::Or(inner) => inner.iter().map(|i| i.max_bytes()).max().unwrap_or(0),
+            Self::Seq(inner) => inner.iter().map(|i| i.max_bytes()).sum(),
+        }
     }
 }
 

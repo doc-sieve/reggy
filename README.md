@@ -1,6 +1,6 @@
 # Reggy
 
-A friendly regular expression dialect for text analytics. Typical regex features are removed/adjusted to make natural language queries easier. Able to search a stream with several patterns at once.
+A friendly regular expression dialect for text analytics. Typical regex features are removed/adjusted to make natural language queries easier. Unicode-aware and able to search a stream with several patterns at once. 
 
 `cargo add reggy`
 
@@ -36,7 +36,7 @@ let mut search = Search::compile(&[
 ]).unwrap();
 ```
 
-Call `Search::next` to begin searching. It will return [definitely-complete matches](#definitely-complete-matches) immediately.
+Call `Search::next` to begin searching. It will yield any matches deemed [definitely-complete](#definitely-complete-matches) immediately.
 ```rust
 let jane_match = Match::new(1, (0, 8));
 assert_eq!(
@@ -92,15 +92,13 @@ See more in the [API docs](https://doc-sieve.github.io/reggy).
 
 `#.##` matches `3.14`
 
-## Unicode, Stream, and Multi-Pattern Semantics
-
-`Reggy` operates on Unicode scalar values. When searching a stream, `next` step boundaries are treated as zero-width word boundaries.
-
-### Definitely-Complete Matches
+## Definitely-Complete Matches
 
 `Reggy` follows greedy matching semantics. A pattern may match after one step of a stream, yet may match a longer form depending on the next step. For example, `ab|abb` will match `s.next("ab")`, but a subsequent call to `s.next("b")` would create a longer match, `"abb"`, which should supercede the match `"ab"`.
 
-`Search` only yields matches once they are definitely complete and cannot be superceded by future `next` calls. Each pattern [computes](https://doc-sieve.github.io/reggy/reggy/enum.Ast.html#method.max_bytes) a maximum length `L` (this is why unbound quantifiers are absent from `Reggy`). Once `Reggy` has streamed at most `L` bytes, (counting contiguous whitespace as 1 byte), past the start of a match without superceding it, that match will be yielded.
+`Search` only yields matches once they are definitely complete and cannot be superceded by future `next` calls. Each pattern has a [maximum byte length](https://doc-sieve.github.io/reggy/reggy/enum.Ast.html#method.max_bytes) `L` (this is why unbound quantifiers are absent from `reggy`). Once `reggy` has streamed at most `L` bytes (counting contiguous whitespace as 1 byte), past the start of a match without superceding it, that match will be yielded. Matches may be yielded earlier if the DFA reaches a dead state.
+
+As a consequence, the `Match`es returned by a given `Search` are the same regardless of how a given haystack is segmented. `Search::next` returns `Match`es as soon as it practically can while respecting this invariant.
 
 ## Implementation
 
@@ -108,4 +106,4 @@ The pattern language is parsed with [`lalrpop`](https://lalrpop.github.io/lalrpo
 
 The search routines use a [`regex_automata::dense::DFA`](https://docs.rs/regex-automata/latest/regex_automata/dfa/dense/struct.DFA.html). Compared to other regex engines, the dense DFA is memory-intensive and slow to construct, but searches are fast. Unicode word boundaries are handled by the [`unicode_segmentation`](https://docs.rs/unicode-segmentation/latest) crate.
 
-[^1]: The resulting patterns are equivalent, except that `Reggy` parses any continuous substring of spaces in the pattern as `\s+`, which is transpiled as ` `, and surrounds patterns with implicit word boundaries, which are not transpiled.
+[^1]: The resulting patterns are equivalent, except that `reggy` parses any continuous substring of spaces in the pattern as `\s+`, which is transpiled as ` `, and surrounds patterns with implicit word boundaries, which are not transpiled.

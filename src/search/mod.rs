@@ -13,13 +13,17 @@ use crate::{Ast, Error};
 
 type Dfa = dfa::dense::DFA<Vec<u32>>;
 
+/// A match object returned from a [`Search`]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Match {
+    /// The index of the pattern matched
     pub id: usize,
+    /// The byte span of the match relative to the start of the stream
     pub span: (usize, usize),
 }
 
 impl Match {
+    /// Convenience function for testing
     pub fn new(id: usize, span: (usize, usize)) -> Self {
         Match { span, id }
     }
@@ -78,6 +82,7 @@ fn word_is_whitespace(word: &str) -> bool {
     true
 }
 
+/// A compiled searcher for multiple patterns against a stream of text
 #[derive(Debug, Clone)]
 pub struct Search {
     dfa: Dfa,
@@ -89,6 +94,7 @@ pub struct Search {
 }
 
 impl Search {
+    /// Try to compile multiple patterns, raising any parse error encountered
     pub fn compile(patterns: &[impl AsRef<str>]) -> Result<Self, Error> {
         let mut compiled_patterns = Vec::with_capacity(patterns.len());
         for pattern in patterns {
@@ -97,6 +103,7 @@ impl Search {
         Ok(Self::new(&compiled_patterns))
     }
 
+    /// Compile from already-parsed ASTs
     pub fn new(patterns: &[Ast]) -> Self {
         let transpiled_patterns = patterns.iter().map(Ast::to_regex).collect::<Vec<_>>();
         let pattern_max_lens = patterns.iter().map(Ast::max_bytes).collect();
@@ -184,6 +191,7 @@ impl Search {
         matches
     }
 
+    /// Step through a chunk of text, yielding any matches that are definitely-complete
     pub fn next(&mut self, haystack: impl AsRef<str>) -> Vec<Match> {
         haystack
             .as_ref()
@@ -192,6 +200,7 @@ impl Search {
             .collect()
     }
 
+    /// Yield any pending, not-definitely-complete matches
     pub fn peek_finish(&self) -> Vec<Match> {
         self.state
             .iter()
@@ -199,6 +208,7 @@ impl Search {
             .collect()
     }
 
+    /// Clear the match state, yielding any pending, not-definitely-complete matches
     pub fn finish(&mut self) -> Vec<Match> {
         self.pos = 0;
         self.ws_folded_pos = 0;
@@ -209,6 +219,7 @@ impl Search {
             .collect()
     }
 
+    /// Clear the match state
     pub fn reset(&mut self) {
         self.pos = 0;
         self.ws_folded_pos = 0;

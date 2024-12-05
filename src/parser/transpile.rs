@@ -170,6 +170,7 @@ impl Ast {
         }
     }
 
+    /// Transpile to a [regex](https://docs.rs/regex/) AST
     pub fn to_regex_ast(&self) -> re_ast::Ast {
         re_ast::Ast::group(re_ast::Group {
             span: dummy_span(),
@@ -178,6 +179,7 @@ impl Ast {
         })
     }
 
+    /// Transpile to a [regex](https://docs.rs/regex/) string
     pub fn to_regex(&self) -> String {
         self.to_regex_ast().to_string()
     }
