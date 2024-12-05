@@ -1,5 +1,5 @@
 use crate::parser::{lexer, ast, Error};
-use lexer::Tok;
+use lexer::{Tok, BoundedQuantifierData};
 use ast::Ast;
 
 grammar();
@@ -10,6 +10,7 @@ pub Ast: ast::Ast = {
     
     #[precedence(level="1")] #[assoc(side="right")]
     <t: Ast> "?" => Ast::optional(t),
+    <inner: Ast> <q: "{quant}"> => Ast::bounded_quant(inner, q.n, q.m),
     
     #[precedence(level="2")] #[assoc(side="left")]
     <lhs: Ast> <rhs: Ast> => Ast::then(lhs, rhs),
@@ -39,5 +40,6 @@ extern {
         "char" => lexer::Tok::Char { c: <char>, .. },
         "digit" => lexer::Tok::Digit,
         " " => lexer::Tok::Space,
+        "{quant}" => lexer::Tok::BoundedQuantifier(<BoundedQuantifierData>),
     }
 }

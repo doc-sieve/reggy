@@ -13,6 +13,7 @@ pub enum Error {
     ParseError,
     DanglingEscape,
     UnnecessaryEscape,
+    BadQuantifier
 }
 
 impl Error {
@@ -51,6 +52,7 @@ impl Ast {
             Self::Optional(inner) => inner.max_bytes(),
             Self::Or(inner) => inner.iter().map(|i| i.max_bytes()).max().unwrap_or(0),
             Self::Seq(inner) => inner.iter().map(|i| i.max_bytes()).sum(),
+            Self::Quantifier(inner, _, max) => inner.max_bytes() * (*max as usize)
         }
     }
 }

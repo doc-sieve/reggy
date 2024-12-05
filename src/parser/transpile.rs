@@ -166,6 +166,11 @@ impl Ast {
                         ast: Box::new(inner.to_regex_ast_inner(true, true)),
                     })
                 }
+            },
+
+            Self::Quantifier(inner, min, max) => {
+                let range = re_ast::RepetitionRange::Bounded(*min, *max);
+                repetition(inner, re_ast::RepetitionKind::Range(range), cs)
             }
         }
     }

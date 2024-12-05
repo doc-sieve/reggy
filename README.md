@@ -94,9 +94,9 @@ See more in the [API docs](https://doc-sieve.github.io/reggy).
 
 `Reggy` follows greedy matching semantics. A pattern may match after one step of a stream, yet may match a longer form depending on the next step. For example, `ab|abb` will match `s.next("ab")`, but a subsequent call to `s.next("b")` would create a longer match, `"abb"`, which should supercede the match `"ab"`.
 
-`Search` only yields matches once they are definitely complete and cannot be superceded by future `next` calls. Each pattern has a [maximum byte length](https://doc-sieve.github.io/reggy/reggy/enum.Ast.html#method.max_bytes) `L` (this is why unbound quantifiers are absent from `reggy`). Once `reggy` has streamed at most `L` bytes (counting contiguous whitespace as 1 byte), past the start of a match without superceding it, that match will be yielded. Matches may be yielded earlier if the DFA reaches a dead state.
+`Search` only yields matches once they are definitely complete and cannot be superceded by future `next` calls. Each pattern has a [maximum byte length](https://doc-sieve.github.io/reggy/reggy/enum.Ast.html#method.max_bytes) `L`, counting contiguous whitespace as 1 byte.[^2] Once `reggy` has streamed at most `L` bytes past the start of a match without superceding it, that match will be yielded. Matches may be yielded earlier if the DFA reaches a dead state.
 
-As a consequence, the `Match`es returned by a given `Search` are the same regardless of how a given haystack is segmented. `Search::next` returns `Match`es as soon as it practically can while respecting this invariant.
+As a consequence, **the `Match`es returned by a given `Search` are the same regardless of how a given haystack stream is segmented**. `Search::next` returns `Match`es as soon as it practically can while respecting this invariant.
 
 ## Implementation
 
@@ -105,3 +105,5 @@ The pattern language is parsed with [`lalrpop`](https://lalrpop.github.io/lalrpo
 The search routines use a [`regex_automata::dense::DFA`](https://docs.rs/regex-automata/latest/regex_automata/dfa/dense/struct.DFA.html). Compared to other regex engines, the dense DFA is memory-intensive and slow to construct, but searches are fast. Unicode word boundaries are handled by the [`unicode_segmentation`](https://docs.rs/unicode-segmentation/latest) crate.
 
 [^1]: The resulting patterns are equivalent, except that `reggy` parses any continuous substring of spaces in the pattern as `\s+`, which is transpiled as ` `, and surrounds patterns with implicit word boundaries, which are not transpiled.
+
+[^2]: This is why unbounded quantifiers are absent from `reggy`. When a pattern requires `*` or `+`, users should choose an upper limit (`{0,n}`, `{1,n}`) instead. Relying on the DFA's dead state to flush matches is a bad idea when the number of patterns increases; it only takes one unlucky pattern to keep the DFA alive for an indeterminate number of stream steps.
