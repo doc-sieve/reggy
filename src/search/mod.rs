@@ -89,6 +89,7 @@ pub struct Search {
     pos: usize,
     ws_folded_pos: usize,
     last_word_was_ws: bool,
+    push_state: bool,
     state: Vec<VisitedWord>,
     pattern_max_lens: Vec<usize>,
 }
@@ -119,6 +120,7 @@ impl Search {
             pos: 0,
             ws_folded_pos: 0,
             last_word_was_ws: false,
+            push_state: true,
             state: vec![],
             pattern_max_lens,
         }
@@ -128,7 +130,9 @@ impl Search {
         let mut matches = vec![];
         let last_pos = self.pos;
         let last_ws_folded_pos = self.ws_folded_pos;
+        let last_push_state = self.push_state;
 
+        self.push_state = true;
         self.pos += haystack.len();
 
         let curr_word_is_whitespace = word_is_whitespace(haystack);
@@ -144,8 +148,13 @@ impl Search {
             self.ws_folded_pos += haystack.len();
         }
 
-        self.state
-            .push(VisitedWord::new(last_pos, last_ws_folded_pos, &self.dfa));
+        if last_push_state {
+            self.state.push(VisitedWord::new(
+                last_pos,
+                last_ws_folded_pos,
+                &self.dfa
+            ));
+        }
 
         self.state.retain_mut(|word| {
             if curr_word_is_whitespace {
@@ -193,11 +202,12 @@ impl Search {
 
     /// Step through a chunk of text, yielding any matches that are definitely-complete
     pub fn next(&mut self, haystack: impl AsRef<str>) -> Vec<Match> {
-        haystack
-            .as_ref()
-            .split_word_bounds()
-            .flat_map(|w| self.step_word(w))
-            .collect()
+        if self.pos > 0 {
+            self.push_state = false;
+        }
+
+        let words = haystack.as_ref().split_word_bounds();
+        words.flat_map(|w| self.step_word(w)).collect()
     }
 
     /// Yield any pending, not-definitely-complete matches

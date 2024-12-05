@@ -1,4 +1,4 @@
-#![doc = include_str!("../README.md")]
+//! A friendly regular expression dialect for text analytics. Typical regex features are removed/adjusted to make natural language queries easier. Unicode-aware and able to search a stream with several patterns at once. 
 
 mod parser;
 mod search;
