@@ -8,6 +8,7 @@ pub enum Ast {
     Or(Vec<Ast>),
     Optional(Box<Ast>),
     CS(Box<Ast>),
+    Quantifier(Box<Ast>, u32, u32)
 }
 
 impl Ast {
@@ -32,6 +33,7 @@ impl Ast {
             Self::Optional(inner) => inner.is_cs(),
             Self::Or(inner) => inner.iter().all(|i| i.is_cs()),
             Self::Seq(inner) => inner.iter().all(|i| i.is_cs()),
+            Self::Quantifier(inner, _, _) => inner.is_cs()
         }
     }
 
@@ -67,5 +69,13 @@ impl Ast {
 
     pub(super) fn optional(inner: Ast) -> Self {
         Self::Optional(Box::new(inner))
+    }
+
+    pub(super) fn quantifier_exact(inner: Ast, n: u32) -> Self {
+        Self::Quantifier(Box::new(inner), n, n + 1)
+    }
+
+    pub(super) fn quantifier_range(inner: Ast, min: u32, max: u32) -> Self {
+        Self::Quantifier(Box::new(inner), min, max)
     }
 }

@@ -64,7 +64,7 @@ See more in the [API docs](https://doc-sieve.github.io/reggy).
 
 ## Pattern Language
 
-`Reggy` is case-insensitive by default. Spaces match any amount of whitespace (i.e. `\s+`). All the reserved characters mentioned below (`\`, `(`, `)`, `?`, `|`, `#`, and `!`) may be escaped with a backslash for a literal match. Patterns are surrounded by implicit [unicode word boundaries](https://unicode.org/reports/tr29) (i.e. `\b`). Empty patterns or subpatterns are not permitted.
+`Reggy` is case-insensitive by default. Spaces match any amount of whitespace (i.e. `\s+`). All the reserved characters mentioned below (`\`, `(`, `)`, `{`, `}`, `?`, `|`, `#`, and `!`) may be escaped with a backslash for a literal match. Patterns are surrounded by implicit [unicode word boundaries](https://unicode.org/reports/tr29) (i.e. `\b`). Empty patterns or subpatterns are not permitted.
 
 ### Examples
 

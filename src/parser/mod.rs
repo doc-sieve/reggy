@@ -12,8 +12,7 @@ lalrpop_util::lalrpop_mod!(pub grammar, "/parser/grammar.rs");
 pub enum Error {
     ParseError,
     DanglingEscape,
-    UnnecessaryEscape,
-    BadQuantifier
+    UnnecessaryEscape
 }
 
 impl Error {
@@ -61,7 +60,7 @@ impl Ast {
 mod tests {
     use super::{
         Ast,
-        Ast::{Char, Digit, Optional, Or, Seq, CS},
+        Ast::{Char, Digit, Optional, Or, Seq, CS, Quantifier},
     };
 
     #[test]
@@ -131,6 +130,18 @@ mod tests {
                 Optional(Box::new(Seq(vec![Char('ⲗ'), Char('ⲗ'),]))),
                 Char('ⲫ'),
                 Char('ⲁ'),
+            ]))
+        )
+    }
+
+    #[test]
+    fn parse_quantifiers() {
+        assert_eq!(
+            Ast::parse(r"a{10}b{2,3}(cde){4}"),
+            Ok(Seq(vec![
+                Quantifier(Box::new(Char('a')), 10, 11),
+                Quantifier(Box::new(Char('b')), 2, 3),
+                Quantifier(Box::new(Seq(vec![Char('c'), Char('d'),Char('e')])), 4, 5),
             ]))
         )
     }

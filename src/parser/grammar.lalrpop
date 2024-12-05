@@ -1,5 +1,7 @@
-use crate::parser::{lexer, ast, Error};
-use lexer::{Tok, BoundedQuantifierData};
+use std::str::FromStr;
+
+use crate::parser::{ParseError, lexer, ast, Error};
+use lexer::Tok;
 use ast::Ast;
 
 grammar();
@@ -10,8 +12,20 @@ pub Ast: ast::Ast = {
     
     #[precedence(level="1")] #[assoc(side="right")]
     <t: Ast> "?" => Ast::optional(t),
-    <inner: Ast> <q: "{quant}"> => Ast::bounded_quant(inner, q.n, q.m),
-    
+    <t: Ast> "{" <n: Nat> "}" =>? {
+        if let Some(n) = n {
+            Ok(Ast::quantifier_exact(t, n))
+        } else {
+            Err(ParseError::User { error: Error::ParseError })
+        }
+    },
+    <t: Ast> "{" <min: Nat> "," <max: Nat> "}" =>? {
+        if let (Some(min), Some(max)) = (min, max) {
+            Ok(Ast::quantifier_range(t, min, max))
+        } else {
+            Err(ParseError::User { error: Error::ParseError })
+        }
+    },
     #[precedence(level="2")] #[assoc(side="left")]
     <lhs: Ast> <rhs: Ast> => Ast::then(lhs, rhs),
     
@@ -27,6 +41,30 @@ Term: ast::Ast = {
     "(" "!" <p: Ast> ")" => Ast::case_sensitive(p)
 }
 
+Nat: Option<u32> = <s: NatSeq> => s.as_deref().map(u32::from_str)?.ok();
+
+NatSeq: Option<String> = {
+    <c: "char"> => {
+        if matches!(c, '0'..='9') {
+            Some(String::from(c))
+        } else {
+            None
+        }
+    },
+    <substr: NatSeq> <c: "char"> => {
+        if let Some(mut substr) = substr {
+            if matches!(c, '0'..='9') {
+                substr.push(c);
+                Some(substr)
+            } else {
+                None
+            }
+        } else {
+            None
+        }
+    }
+}
+
 extern {
     type Location = usize;
     type Error = Error;
@@ -36,10 +74,12 @@ extern {
         "?" => lexer::Tok::QMark,
         "(" => lexer::Tok::LParen,
         ")" => lexer::Tok::RParen,
+        "{" => lexer::Tok::LCurly,
+        "}" => lexer::Tok::RCurly,
         "!" => lexer::Tok::Exclam,
+        "," => lexer::Tok::Comma,
         "char" => lexer::Tok::Char { c: <char>, .. },
         "digit" => lexer::Tok::Digit,
-        " " => lexer::Tok::Space,
-        "{quant}" => lexer::Tok::BoundedQuantifier(<BoundedQuantifierData>),
+        " " => lexer::Tok::Space
     }
 }
