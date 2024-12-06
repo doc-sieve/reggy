@@ -55,10 +55,10 @@ let patterns = [
 
 let mut pattern_counts = [0; 2];
 
-let mut search = Search::compile(&patterns).unwrap();
+let mut search = Search::compile(&patterns)?;
 ```
 
-Call `Search::iter` to create a [`StreamSearch`](https://doc-sieve.github.io/reggy/reggy/struct.StreamSearch.html). Any IO errors or malformed UTF-8 will be return a [`SearchStreamError`](https://doc-sieve.github.io/reggy/reggy/struct.SearchStreamError.html). 
+Call `Search::iter` to create a [`StreamSearch`](https://doc-sieve.github.io/reggy/reggy/struct.StreamSearch.html). Any IO errors or malformed UTF-8 will be return a [`SearchStreamError`](https://doc-sieve.github.io/reggy/reggy/enum.SearchStreamError.html). 
 
 ```rust
 for result in search.iter(f) {
