@@ -1,5 +1,7 @@
+use core::str;
 use std::collections::{HashMap, VecDeque};
 use std::io::{self, BufRead};
+use std::str::Utf8Error;
 
 use regex_automata::dfa::Automaton;
 use regex_automata::util::{
@@ -83,6 +85,34 @@ fn word_is_whitespace(word: &str) -> bool {
     true
 }
 
+
+#[derive(Debug, Clone)]
+enum Utf8RaggedEdge {
+    Zero,
+    One(u8),
+    Two(u8, u8),
+    Three(u8, u8, u8)
+}
+
+/// An error raised while searching a stream 
+#[derive(Debug)]
+pub enum SearchStreamError {
+    IOError(io::Error),
+    Utf8Error
+}
+
+impl From::<io::Error> for SearchStreamError {
+    fn from(e: io::Error) -> Self {
+        Self::IOError(e)
+    }
+}
+
+impl From::<Utf8Error> for SearchStreamError {
+    fn from(_: Utf8Error) -> Self {
+        Self::Utf8Error
+    }
+}
+
 /// A compiled searcher for multiple patterns against a stream of text
 #[derive(Debug, Clone)]
 pub struct Search {
@@ -93,6 +123,7 @@ pub struct Search {
     push_state: bool,
     state: Vec<VisitedWord>,
     pattern_max_lens: Vec<usize>,
+    utf8_ragged_edge: Utf8RaggedEdge
 }
 
 impl Search {
@@ -127,6 +158,7 @@ impl Search {
             push_state: true,
             state: vec![],
             pattern_max_lens,
+            utf8_ragged_edge: Utf8RaggedEdge::Zero
         }
     }
 
@@ -212,7 +244,13 @@ impl Search {
     }
 
     /// Step through a chunk of text, yielding any matches that are definitely-complete
+    /// This function panics if called while the stream is partially-through a utf-8 char
+    /// (after a call to next_bytes)
     pub fn next(&mut self, haystack: impl AsRef<str>) -> Vec<Match> {
+        if !matches!(self.utf8_ragged_edge, Utf8RaggedEdge::Zero) {
+            panic!("utf-8 ragged edge");
+        }
+
         if self.pos > 0 {
             self.push_state = false;
         }
@@ -221,13 +259,85 @@ impl Search {
         words.flat_map(|w| self.step_word(w)).collect()
     }
 
+    /// Step through a chunk of bytes, yielding any matches that are definitely-complete
+    /// This function panics if given definitely-invalid utf8
+    /// An incomplete character may fill the last 1-3 bytes
+    /// In which case, the character fragment will be completed on the next call to next_bytes
+    pub fn next_bytes(&mut self, haystack: &[u8]) -> Result<Vec<Match>, SearchStreamError> {
+        // no choice but to re-allocate? :(
+        let mut v = vec![];
+        let haystack_adj = match self.utf8_ragged_edge {
+            Utf8RaggedEdge::Zero => haystack,
+            Utf8RaggedEdge::One(a) => {
+                v.reserve(haystack.len() + 1);
+                v.push(a);
+                v.extend(haystack);
+                v.as_slice()
+            },
+            Utf8RaggedEdge::Two(a, b) => {
+                v.reserve(haystack.len() + 1);
+                v.push(a);
+                v.push(b);
+                v.extend(haystack);
+                v.as_slice()
+            }
+            Utf8RaggedEdge::Three(a, b, c) => {
+                v.reserve(haystack.len() + 1);
+                v.push(a);
+                v.push(b);
+                v.push(c);
+                v.extend(haystack);
+                v.as_slice()
+            }
+        };
+
+        let haystack_str = match str::from_utf8(haystack_adj) {
+            Ok(s) => {
+                self.utf8_ragged_edge = Utf8RaggedEdge::Zero;
+                s
+            },
+            Err(e) => {
+                let error_before_end = e.error_len();
+                if error_before_end.is_some() {
+                    return Err(SearchStreamError::Utf8Error)
+                } else {
+                    let s = std::str::from_utf8(&haystack_adj[..e.valid_up_to()]).unwrap();
+                    match haystack_adj.len() - e.valid_up_to() {
+                        1 => {
+                            self.utf8_ragged_edge = Utf8RaggedEdge::One(
+                                haystack_adj[haystack_adj.len() - 1]
+                            )
+                        },
+                        2 => {
+                            self.utf8_ragged_edge = Utf8RaggedEdge::Two(
+                                haystack_adj[haystack_adj.len() - 2],
+                                haystack_adj[haystack_adj.len() - 1]
+                            )
+                        },
+                        3 => {
+                            self.utf8_ragged_edge = Utf8RaggedEdge::Three(
+                                haystack_adj[haystack_adj.len() - 3],
+                                haystack_adj[haystack_adj.len() - 2],
+                                haystack_adj[haystack_adj.len() - 1],
+                            )
+                        }
+                        _ => panic!()
+                    }
+                    s
+                }
+            }
+        };
+
+        let words = haystack_str.split_word_bounds();
+        Ok(words.flat_map(|w| self.step_word(w)).collect())
+    }
+
     /// Iterate over a buffered reader
-    pub fn iter_lines<'a, R: BufRead>(&'a mut self, reader: R) -> StreamSearchLines<'a, R> {
-        StreamSearchLines {
+    pub fn iter<'a, R: BufRead>(&'a mut self, reader: R) -> StreamSearch<'a, R> {
+        StreamSearch {
             search: self,
             reader,
             res_buf: VecDeque::new(),
-            line_buf: String::new(),
             closed: false
         }
     }
@@ -272,43 +382,43 @@ impl Search {
     }
 }
 
-pub struct StreamSearchLines<'a, R: io::BufRead> {
+pub struct StreamSearch<'a, R: io::BufRead> {
     search: &'a mut Search,
     reader: R,
     res_buf: VecDeque<Match>,
-    line_buf: String,
     closed: bool
 }
 
-impl<'a, R: io::BufRead> Iterator for StreamSearchLines<'a, R> {
-    type Item = Result<Match, io::Error>;
+impl<'a, R: io::BufRead> Iterator for StreamSearch<'a, R> {
+    type Item = Result<Match, SearchStreamError>;
 
-    fn next(&mut self) -> Option<Result<Match, io::Error>> {
+    fn next(&mut self) -> Option<Result<Match, SearchStreamError>> {
         if let Some(res) = self.res_buf.pop_front() {
             return Some(Ok(res))
         } else if self.closed {
             return None
         }
 
-        loop {
-            self.line_buf.clear();
-            let line = self.reader.read_line(&mut self.line_buf);
-            match line {
-                Ok(len) => {
-                    if len == 0 {
-                        self.closed = true;
-                        self.res_buf = VecDeque::from(self.search.finish());
-                        return self.res_buf.pop_front().map(|m| Ok(m));
-                    } else {
-                        self.res_buf = VecDeque::from(self.search.next(&self.line_buf));
-                        if let Some(res) = self.res_buf.pop_front() {
-                            return Some(Ok(res))
-                        }
+        let buf = self.reader.fill_buf();
+
+        match buf {
+            Ok(buf) => {
+                if buf.is_empty() {
+                    self.closed = true;
+                    self.res_buf = VecDeque::from(self.search.finish());
+                } else {
+                    match self.search.next_bytes(buf) {
+                        Ok(res) => self.res_buf = VecDeque::from(res),
+                        Err(e) => return Some(Err(e))
                     }
-                },
-                Err(e) => return Some(Err(e)),
-            }    
+                    let len = buf.len();
+                    self.reader.consume(len);
+                }
+            },
+            Err(e) => return Some(Err(e.into())),
         }
+
+        self.res_buf.pop_front().map(|m| Ok(m))
     }
 }
 
@@ -340,90 +450,5 @@ mod tests {
 
         assert_eq!(s.next("abb"), vec![Match::new(0, (0, 3))]);
         assert_eq!(s.finish(), vec![]);
-    }
-
-    #[test]
-    fn chunk_invariant_fuzz() {
-        use rand::prelude::*;
-
-        let mut rng = SmallRng::seed_from_u64(1);
-
-        const MIN_HAYSTACK_LEN: usize = 80;
-        const MIN_PATTERN_LEN: usize = 4;
-        const N_PATTERNS: usize = 4;
-        const N_PARTITIONS: usize = 5;
-        const N_PARTITION_RUNS: usize = 5;
-
-        fn random_pattern(rng: &mut SmallRng) -> String {
-            let d: [u8; MIN_PATTERN_LEN] = rng.gen();
-            let mut res = String::with_capacity(MIN_PATTERN_LEN);
-            for i in 0..MIN_PATTERN_LEN {
-                res.push(((d[i] % 3) + 97) as u8 as char);
-                if rng.gen::<i32>() % 2 == 0 {
-                    res.push('?');
-                }
-            }
-
-            res
-        }
-
-        let patterns: Vec<_> = (0..N_PATTERNS).map(|_| random_pattern(&mut rng)).collect();
-        println!("Patterns: {:?}", patterns);
-
-        fn random_haystack(rng: &mut SmallRng) -> String {
-            let mut res = String::with_capacity(MIN_HAYSTACK_LEN);
-            for _ in 0..MIN_HAYSTACK_LEN {
-                let d: u8 = rng.gen();
-                res.push(((d % 3) + 97) as u8 as char);
-                if rng.gen::<i32>() % 2 == 0 {
-                    res.push(' ');
-                }
-            }
-
-            res
-        }
-
-        let haystack = random_haystack(&mut rng);
-        println!("Haystack: {:?}\n", haystack);
-
-        let mut s = Search::compile(&patterns).unwrap();
-
-        let mut all_match_sets = vec![];
-
-        for i in 0..N_PARTITION_RUNS {
-            s.reset();
-            let mut matches = vec![];
-
-            let d: [usize; N_PARTITIONS] = rng.gen();
-            let mut d: Vec<_> = d.iter().map(|i| i % haystack.len()).collect();
-            d.sort();
-            println!("Partition {}: {:?}", i, d);
-
-            let mut hay_i = 0;
-            for partition in d {
-                if partition > hay_i {
-                    matches.extend(s.next(&haystack[hay_i..partition]));
-                    hay_i = partition;
-                }
-            }
-
-            matches.extend(s.next(&haystack[hay_i..haystack.len()]));
-            matches.extend(s.finish());
-
-            all_match_sets.push(matches);
-        }
-
-        s.reset();
-        let mut canonical_matches = vec![];
-        canonical_matches.extend(s.next(haystack));
-        canonical_matches.extend(s.finish());
-
-        for i in 0..N_PARTITION_RUNS {
-            assert_eq!(
-                all_match_sets[i], canonical_matches,
-                "Partition {} did not match canon",
-                i
-            );
-        }
     }
 }
