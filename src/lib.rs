@@ -62,7 +62,7 @@ mod parser;
 mod search;
 
 pub use parser::{Ast, Error};
-pub use search::{Match, Search, StreamSearch, SearchStreamError};
+pub use search::{Match, Search, SearchStreamError, StreamSearch};
 
 /// A high-level interface for matching a single `reggy` pattern
 #[derive(Clone)]

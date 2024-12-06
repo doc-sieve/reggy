@@ -1,0 +1,51 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="A friendly regular expression dialect for text analytics. Typical regex features are removed/adjusted to make natural language queries easier. Unicode-aware and able to search a stream with several patterns at once."><title>reggy - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../static.files/rustdoc-492a78a4a87dcc01.css"><meta name="rustdoc-vars" data-root-path="../" data-static-root-path="../static.files/" data-current-crate="reggy" data-themes="" data-resource-suffix="" data-rustdoc-version="1.82.0 (f6e511eec 2024-10-15)" data-channel="1.82.0" data-search-js="search-a99f1315e7cc5121.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../crates.js"></script><script defer src="../static.files/main-921df33f47b8780c.js"></script><noscript><link rel="stylesheet" href="../static.files/noscript-3b12f09e550e0385.css"></noscript><link rel="alternate icon" type="image/png" href="../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc mod crate"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button></nav><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../reggy/index.html">reggy</a><span class="version">0.0.6</span></h2></div><div class="sidebar-elems"><ul class="block"><li><a id="all-types" href="all.html">All Items</a></li></ul><section><ul class="block"><li><a href="#structs">Structs</a></li><li><a href="#enums">Enums</a></li></ul></section></div></nav><div class="sidebar-resizer"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1>Crate <a class="mod" href="#">reggy</a><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><span class="out-of-band"><a class="src" href="../src/reggy/lib.rs.html#1-98">source</a> · <button id="toggle-all-docs" title="collapse all docs">[<span>&#x2212;</span>]</button></span></div><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>A friendly regular expression dialect for text analytics. Typical regex features are removed/adjusted to make natural language queries easier. Unicode-aware and able to search a stream with several patterns at once.</p>
+<h2 id="api-usage"><a class="doc-anchor" href="#api-usage">§</a>API Usage</h2>
+<p>Use the high-level <a href="struct.Pattern.html" title="struct reggy::Pattern"><code>Pattern</code></a> struct for simple search.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>reggy::Pattern;
+
+<span class="kw">let </span><span class="kw-2">mut </span>p = Pattern::new(<span class="string">"dogs?"</span>)<span class="question-mark">?</span>;
+<span class="macro">assert_eq!</span>(
+    p.findall(<span class="string">"cat dog dogs cats"</span>),
+    <span class="macro">vec!</span>[(<span class="number">4</span>, <span class="number">7</span>), (<span class="number">8</span>, <span class="number">12</span>)]
+);</code></pre></div>
+<p>Use the <a href="enum.Ast.html" title="enum reggy::Ast"><code>Ast</code></a> struct to transpile to <a href="https://docs.rs/regex/">normal</a> regex syntax.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>reggy::Ast;
+
+<span class="kw">let </span>ast = Ast::parse(<span class="string">r"dog(gy)?|dawg|(!CAT|KITTY CAT)"</span>)<span class="question-mark">?</span>;
+<span class="macro">assert_eq!</span>(
+    ast.to_regex(),
+    <span class="string">r"\b(?mi:dog(?:gy)?|dawg|(?-i:CAT|KITTY\s+CAT))\b"
+</span>);</code></pre></div>
+<p>Use the <a href="struct.Search.html" title="struct reggy::Search"><code>Search</code></a> struct to search a stream with several patterns at once.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>reggy::{Search, Match};
+
+<span class="kw">let </span><span class="kw-2">mut </span>search = Search::compile(<span class="kw-2">&amp;</span>[
+    <span class="string">r"$#?#?#.##"</span>,
+    <span class="string">r"(John|Jane) Doe"
+</span>])<span class="question-mark">?</span>;
+
+<span class="comment">// Call Search::next to begin searching.
+// It will yield any matches deemed definitely-complete immediately.
+</span><span class="kw">let </span>jane_match = Match::new(<span class="number">1</span>, (<span class="number">0</span>, <span class="number">8</span>));
+<span class="macro">assert_eq!</span>(
+    search.next(<span class="string">"Jane Doe paid John"</span>),
+    <span class="macro">vec!</span>[jane_match]
+);
+
+<span class="comment">// Call Search::next again to continue with the same search state.
+// Note that "John Doe" matched across the chunk boundary.
+// Spans are relative to the start of the stream.
+</span><span class="kw">let </span>john_match = Match::new(<span class="number">1</span>, (<span class="number">14</span>, <span class="number">22</span>));
+<span class="kw">let </span>money_match_1 = Match::new(<span class="number">0</span>, (<span class="number">23</span>, <span class="number">29</span>));
+<span class="kw">let </span>money_match_2 = Match::new(<span class="number">0</span>, (<span class="number">41</span>, <span class="number">48</span>));
+<span class="macro">assert_eq!</span>(
+    search.next(<span class="string">" Doe $45.66 instead of $499.00"</span>),
+    <span class="macro">vec!</span>[john_match, money_match_1, money_match_2]
+);
+ 
+<span class="comment">// Call `Search::finish` to collect any not-definitely-complete matches once the stream is closed.
+</span><span class="macro">assert_eq!</span>(search.finish(), <span class="macro">vec!</span>[]);</code></pre></div>
+</div></details><h2 id="structs" class="section-header">Structs<a href="#structs" class="anchor">§</a></h2><ul class="item-table"><li><div class="item-name"><a class="struct" href="struct.Match.html" title="struct reggy::Match">Match</a></div><div class="desc docblock-short">A match object returned from a <a href="struct.Search.html" title="struct reggy::Search"><code>Search</code></a></div></li><li><div class="item-name"><a class="struct" href="struct.Pattern.html" title="struct reggy::Pattern">Pattern</a></div><div class="desc docblock-short">A high-level interface for matching a single <code>reggy</code> pattern</div></li><li><div class="item-name"><a class="struct" href="struct.Search.html" title="struct reggy::Search">Search</a></div><div class="desc docblock-short">A compiled searcher for multiple patterns against a stream of text</div></li><li><div class="item-name"><a class="struct" href="struct.StreamSearch.html" title="struct reggy::StreamSearch">Stream<wbr>Search</a></div><div class="desc docblock-short">A stream search for the provided BufReader</div></li></ul><h2 id="enums" class="section-header">Enums<a href="#enums" class="anchor">§</a></h2><ul class="item-table"><li><div class="item-name"><a class="enum" href="enum.Ast.html" title="enum reggy::Ast">Ast</a></div><div class="desc docblock-short">A <code>reggy</code> pattern represented as an AST</div></li><li><div class="item-name"><a class="enum" href="enum.Error.html" title="enum reggy::Error">Error</a></div><div class="desc docblock-short">An error raised while parsing a <code>reggy</code> pattern</div></li><li><div class="item-name"><a class="enum" href="enum.SearchStreamError.html" title="enum reggy::SearchStreamError">Search<wbr>Stream<wbr>Error</a></div><div class="desc docblock-short">An error raised while searching a stream</div></li></ul></section></div></main></body></html>
