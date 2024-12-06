@@ -100,7 +100,7 @@ See more in the [API docs](https://doc-sieve.github.io/reggy).
 
 *Match exactly n times with* `{n}`*, or between n and m times with* `{n,m}`
 
-`(very){1,4} strange` matches `very very very strange`
+`(very ){1,4}strange` matches `very very very strange`
 
 ## Definitely-Complete Matches
 
