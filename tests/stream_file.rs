@@ -1,5 +1,5 @@
-use std::io::{self, BufReader};
 use std::fs::File;
+use std::io::{self, BufReader};
 
 use reggy::Search;
 
@@ -10,7 +10,7 @@ fn stream() -> Result<(), io::Error> {
 
     let patterns = [
         r"yes|(very )?true|certainly|quite so|I have no objection|I agree",
-        r"\?"
+        r"\?",
     ];
 
     let mut pattern_counts = [0; 2];
@@ -19,7 +19,9 @@ fn stream() -> Result<(), io::Error> {
 
     for result in search.iter(f) {
         match result {
-            Ok(m) => pattern_counts[m.id] += 1,
+            Ok(m) => {
+                pattern_counts[m.id] += 1;
+            }
             Err(e) => {
                 println!("Stream Error {e:?}");
                 break;
@@ -27,8 +29,8 @@ fn stream() -> Result<(), io::Error> {
         }
     }
 
-    println!("Assent:   {:?}", pattern_counts[0]);
-    println!("Question: {:?}", pattern_counts[1]);
+    assert_eq!(1467, pattern_counts[0]);
+    assert_eq!(1934, pattern_counts[1]);
 
     Ok(())
 }

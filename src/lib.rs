@@ -94,5 +94,5 @@ impl Pattern {
         res.extend(self.s.finish().iter().map(mapper));
         self.s.reset();
         res
-    }    
+    }
 }

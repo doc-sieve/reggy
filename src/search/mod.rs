@@ -1,7 +1,8 @@
+mod stream;
+
 use core::str;
-use std::collections::{HashMap, VecDeque};
-use std::io::{self, BufRead};
-use std::str::Utf8Error;
+use std::collections::HashMap;
+use std::io::BufRead;
 
 use regex_automata::dfa::Automaton;
 use regex_automata::util::{
@@ -13,6 +14,7 @@ use regex_automata::{dfa, Anchored, MatchKind};
 use unicode_segmentation::UnicodeSegmentation;
 
 use crate::{Ast, Error};
+pub use stream::{SearchStreamError, StreamSearch};
 
 type Dfa = dfa::dense::DFA<Vec<u32>>;
 
@@ -85,32 +87,12 @@ fn word_is_whitespace(word: &str) -> bool {
     true
 }
 
-
 #[derive(Debug, Clone)]
 enum Utf8RaggedEdge {
     Zero,
     One(u8),
     Two(u8, u8),
-    Three(u8, u8, u8)
-}
-
-/// An error raised while searching a stream 
-#[derive(Debug)]
-pub enum SearchStreamError {
-    IOError(io::Error),
-    Utf8Error
-}
-
-impl From::<io::Error> for SearchStreamError {
-    fn from(e: io::Error) -> Self {
-        Self::IOError(e)
-    }
-}
-
-impl From::<Utf8Error> for SearchStreamError {
-    fn from(_: Utf8Error) -> Self {
-        Self::Utf8Error
-    }
+    Three(u8, u8, u8),
 }
 
 /// A compiled searcher for multiple patterns against a stream of text
@@ -123,7 +105,7 @@ pub struct Search {
     push_state: bool,
     state: Vec<VisitedWord>,
     pattern_max_lens: Vec<usize>,
-    utf8_ragged_edge: Utf8RaggedEdge
+    utf8_ragged_edge: Utf8RaggedEdge,
 }
 
 impl Search {
@@ -158,7 +140,7 @@ impl Search {
             push_state: true,
             state: vec![],
             pattern_max_lens,
-            utf8_ragged_edge: Utf8RaggedEdge::Zero
+            utf8_ragged_edge: Utf8RaggedEdge::Zero,
         }
     }
 
@@ -273,7 +255,7 @@ impl Search {
                 v.push(a);
                 v.extend(haystack);
                 v.as_slice()
-            },
+            }
             Utf8RaggedEdge::Two(a, b) => {
                 v.reserve(haystack.len() + 1);
                 v.push(a);
@@ -295,25 +277,24 @@ impl Search {
             Ok(s) => {
                 self.utf8_ragged_edge = Utf8RaggedEdge::Zero;
                 s
-            },
+            }
             Err(e) => {
                 let error_before_end = e.error_len();
                 if error_before_end.is_some() {
-                    return Err(SearchStreamError::Utf8Error)
+                    return Err(SearchStreamError::Utf8Error);
                 } else {
                     let s = std::str::from_utf8(&haystack_adj[..e.valid_up_to()]).unwrap();
                     match haystack_adj.len() - e.valid_up_to() {
                         1 => {
-                            self.utf8_ragged_edge = Utf8RaggedEdge::One(
-                                haystack_adj[haystack_adj.len() - 1]
-                            )
-                        },
+                            self.utf8_ragged_edge =
+                                Utf8RaggedEdge::One(haystack_adj[haystack_adj.len() - 1])
+                        }
                         2 => {
                             self.utf8_ragged_edge = Utf8RaggedEdge::Two(
                                 haystack_adj[haystack_adj.len() - 2],
-                                haystack_adj[haystack_adj.len() - 1]
+                                haystack_adj[haystack_adj.len() - 1],
                             )
-                        },
+                        }
                         3 => {
                             self.utf8_ragged_edge = Utf8RaggedEdge::Three(
                                 haystack_adj[haystack_adj.len() - 3],
@@ -321,7 +302,7 @@ impl Search {
                                 haystack_adj[haystack_adj.len() - 1],
                             )
                         }
-                        _ => panic!()
+                        _ => panic!(),
                     }
                     s
                 }
@@ -333,13 +314,8 @@ impl Search {
     }
 
     /// Iterate over a buffered reader
-    pub fn iter<'a, R: BufRead>(&'a mut self, reader: R) -> StreamSearch<'a, R> {
-        StreamSearch {
-            search: self,
-            reader,
-            res_buf: VecDeque::new(),
-            closed: false
-        }
+    pub fn iter<R: BufRead>(&mut self, reader: R) -> StreamSearch<'_, R> {
+        StreamSearch::new(self, reader)
     }
 
     /// Yield any pending, not-definitely-complete matches
@@ -379,46 +355,6 @@ impl Search {
         self.ws_folded_pos = 0;
         self.push_state = true;
         self.state.clear();
-    }
-}
-
-pub struct StreamSearch<'a, R: io::BufRead> {
-    search: &'a mut Search,
-    reader: R,
-    res_buf: VecDeque<Match>,
-    closed: bool
-}
-
-impl<'a, R: io::BufRead> Iterator for StreamSearch<'a, R> {
-    type Item = Result<Match, SearchStreamError>;
-
-    fn next(&mut self) -> Option<Result<Match, SearchStreamError>> {
-        if let Some(res) = self.res_buf.pop_front() {
-            return Some(Ok(res))
-        } else if self.closed {
-            return None
-        }
-
-        let buf = self.reader.fill_buf();
-
-        match buf {
-            Ok(buf) => {
-                if buf.is_empty() {
-                    self.closed = true;
-                    self.res_buf = VecDeque::from(self.search.finish());
-                } else {
-                    match self.search.next_bytes(buf) {
-                        Ok(res) => self.res_buf = VecDeque::from(res),
-                        Err(e) => return Some(Err(e))
-                    }
-                    let len = buf.len();
-                    self.reader.consume(len);
-                }
-            },
-            Err(e) => return Some(Err(e.into())),
-        }
-
-        self.res_buf.pop_front().map(|m| Ok(m))
     }
 }
 
