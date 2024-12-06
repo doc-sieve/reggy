@@ -71,6 +71,7 @@ pub struct Pattern {
 }
 
 impl Pattern {
+    /// Compile one pattern, raising any parse error encountered
     pub fn new(code: &str) -> Result<Self, Error> {
         let ast = Ast::parse(code)?;
         Ok(Self {
@@ -78,12 +79,22 @@ impl Pattern {
         })
     }
 
+    /// Find all matching byte spans
     pub fn findall(&mut self, haystack: &str) -> Vec<(usize, usize)> {
         let mut res: Vec<_> = self.s.next(haystack).iter().map(|m| m.span).collect();
         res.extend(self.s.finish().iter().map(|m| m.span));
         self.s.reset();
         res
     }
+
+    /// Find all matching substrings
+    pub fn findall_str<'a>(&mut self, haystack: &'a str) -> Vec<&'a str> {
+        let mapper = |m: &Match| &haystack[m.span.0..m.span.1];
+        let mut res: Vec<_> = self.s.next(haystack).iter().map(mapper).collect();
+        res.extend(self.s.finish().iter().map(mapper));
+        self.s.reset();
+        res
+    }    
 }
 
 #[cfg(test)]
