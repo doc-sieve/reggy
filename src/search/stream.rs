@@ -4,6 +4,8 @@ use std::str::Utf8Error;
 
 use crate::{Match, Search};
 
+/// A stream search for the provided BufReader
+/// Will return [`StreamSearchError`]s for invalid UTF-8 or IO errors
 pub struct StreamSearch<'a, R: io::BufRead> {
     search: &'a mut Search,
     reader: R,

@@ -32,9 +32,55 @@ assert_eq!(
 );
 ```
 
-### Search a Stream
+### Stream a File
 
-Use the [`Search`](https://doc-sieve.github.io/reggy/reggy/struct.Search.html) struct to search a stream with several patterns at once.
+In this example, we will count the matches of a set of patterns within a file without loading it into memory. Use the [`Search`](https://doc-sieve.github.io/reggy/reggy/struct.Search.html) struct to search a stream with several patterns at once.
+
+Create a `BufReader` for the text.
+```rust
+use std::fs::File;
+use std::io::{self, BufReader};
+
+let f = File::open("tests/samples/republic_plato.txt")?;
+let f = BufReader::new(f);
+```
+
+Compile the search object.
+
+```rust
+let patterns = [
+    r"yes|(very )?true|certainly|quite so|I have no objection|I agree",
+    r"\?",
+];
+
+let mut pattern_counts = [0; 2];
+
+let mut search = Search::compile(&patterns).unwrap();
+```
+
+Call `Search::iter` to create a [`SearchStream`](https://doc-sieve.github.io/reggy/reggy/struct.SearchStream.html). Any IO errors malformed UTF-8 will be return a [`SearchStreamError`](https://doc-sieve.github.io/reggy/reggy/struct.SearchStreamError.html). 
+
+```rust
+for result in search.iter(f) {
+    match result {
+        Ok(m) => {
+            pattern_counts[m.id] += 1;
+        }
+        Err(e) => {
+            println!("Stream Error {e:?}");
+            break;
+        }
+    }
+}
+
+println!("Assent Count:   {}", pattern_counts[0]);
+println!("Question Count: {}", pattern_counts[1]);
+// Assent Count:   1467
+// Question Count: 1934
+```
+
+### Walk a Stream Manually
+
 ```rust
 let mut search = Search::compile(&[
     r"$#?#?#.##",

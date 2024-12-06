@@ -29,8 +29,8 @@ fn stream() -> Result<(), io::Error> {
         }
     }
 
-    assert_eq!(1467, pattern_counts[0]);
-    assert_eq!(1934, pattern_counts[1]);
+    assert_eq!(pattern_counts[0], 1467);
+    assert_eq!(pattern_counts[1], 1934);
 
     Ok(())
 }
