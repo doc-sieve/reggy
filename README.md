@@ -18,7 +18,7 @@ Use the high-level [`Pattern`](https://doc-sieve.github.io/reggy/reggy/struct.Pa
 ```rust
 let mut p = Pattern::new("dogs?")?;
 assert_eq!(
-    p.findall("cat dog dogs cats"),
+    p.findall_spans("cat dog dogs cats"),
     vec![(4, 7), (8, 12)]
 );
 ```
@@ -72,7 +72,7 @@ See more in the [API docs](https://doc-sieve.github.io/reggy).
 
 ## Pattern Language
 
-`reggy` is case-insensitive by default. Spaces match any amount of whitespace (i.e. `\s+`). All the reserved characters mentioned below (`\`, `(`, `)`, `{`, `}`, `?`, `|`, `#`, and `!`) may be escaped with a backslash for a literal match. Patterns are surrounded by implicit [unicode word boundaries](https://unicode.org/reports/tr29) (i.e. `\b`). Empty patterns or subpatterns are not permitted.
+`reggy` is case-insensitive by default. Spaces match any amount of whitespace (i.e. `\s+`). All the reserved characters mentioned below (`\`, `(`, `)`, `{`, `}`, `,`, `?`, `|`, `#`, and `!`) may be escaped with a backslash for a literal match. Patterns are surrounded by implicit [unicode word boundaries](https://unicode.org/reports/tr29) (i.e. `\b`). Empty patterns or subpatterns are not permitted.
 
 ### Examples
 
@@ -108,7 +108,7 @@ See more in the [API docs](https://doc-sieve.github.io/reggy).
 
 `Search` only yields matches once they are definitely complete and cannot be superceded by future `next` calls. Each pattern has a [maximum byte length](https://doc-sieve.github.io/reggy/reggy/enum.Ast.html#method.max_bytes) `L`, counting contiguous whitespace as 1 byte.[^1] Once `reggy` has streamed at most `L` bytes past the start of a match without superceding it, that match will be yielded.
 
-As a consequence, **the `Match`es returned by a given `Search` are the same regardless of how a given haystack stream is chunked**. `Search::next` returns `Match`es as soon as it practically can while respecting this invariant.
+As a consequence, **results of a given `Search` are the same regardless of how a given haystack stream is chunked**. `Search::next` returns `Match`es as soon as it practically can while respecting this invariant.
 
 ## Implementation
 
