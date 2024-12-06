@@ -45,7 +45,7 @@ Nat: Option<u32> = <s: NatSeq> => s.as_deref().map(u32::from_str)?.ok();
 
 NatSeq: Option<String> = {
     <c: "char"> => {
-        if matches!(c, '0'..='9') {
+        if c.is_ascii_digit() {
             Some(String::from(c))
         } else {
             None
@@ -53,7 +53,7 @@ NatSeq: Option<String> = {
     },
     <substr: NatSeq> <c: "char"> => {
         if let Some(mut substr) = substr {
-            if matches!(c, '0'..='9') {
+            if c.is_ascii_digit() {
                 substr.push(c);
                 Some(substr)
             } else {

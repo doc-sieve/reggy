@@ -1,4 +1,4 @@
-//! A friendly regular expression dialect for text analytics. Typical regex features are removed/adjusted to make natural language queries easier. Unicode-aware and able to search a stream with several patterns at once. 
+//! A friendly regular expression dialect for text analytics. Typical regex features are removed/adjusted to make natural language queries easier. Unicode-aware and able to search a stream with several patterns at once.
 
 mod parser;
 mod search;
@@ -40,8 +40,8 @@ mod test {
 
     #[test]
     fn readme_compile() {
-        let ast = Ast::parse(r"do(gg.)?|(!CAT|CAR FAR)").unwrap();
-        assert_eq!(ast.to_regex(), r"(?mi:do(?:gg\.)?|(?-i:CAT|CAR FAR))");
+        let ast = Ast::parse(r"dog(gy)?|dawg|(!CAT|KITTY CAT)").unwrap();
+        assert_eq!(ast.to_regex(), r"\b(?mi:dog(?:gy)?|dawg|(?-i:CAT|KITTY\s+CAT))\b");
     }
 
     #[test]
@@ -73,6 +73,12 @@ mod test {
             p.findall("United states of america Usa USA"),
             vec![(0, 24), (29, 32)]
         );
+    }
+
+    #[test]
+    fn readme_quantifiers() {
+        let mut s = Pattern::new("(very ){1,4}strange").unwrap();
+        assert_eq!(vec![(0, 22)], s.findall("very very very strange"));
     }
 
     #[test]

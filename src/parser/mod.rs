@@ -12,7 +12,7 @@ lalrpop_util::lalrpop_mod!(pub grammar, "/parser/grammar.rs");
 pub enum Error {
     ParseError,
     DanglingEscape,
-    UnnecessaryEscape
+    UnnecessaryEscape,
 }
 
 impl Error {
@@ -51,7 +51,7 @@ impl Ast {
             Self::Optional(inner) => inner.max_bytes(),
             Self::Or(inner) => inner.iter().map(|i| i.max_bytes()).max().unwrap_or(0),
             Self::Seq(inner) => inner.iter().map(|i| i.max_bytes()).sum(),
-            Self::Quantifier(inner, _, max) => inner.max_bytes() * (*max as usize)
+            Self::Quantifier(inner, _, max) => inner.max_bytes() * (*max as usize),
         }
     }
 }
@@ -60,7 +60,7 @@ impl Ast {
 mod tests {
     use super::{
         Ast,
-        Ast::{Char, Digit, Optional, Or, Seq, CS, Quantifier},
+        Ast::{Char, Digit, Optional, Or, Quantifier, Seq, CS},
     };
 
     #[test]
@@ -141,7 +141,7 @@ mod tests {
             Ok(Seq(vec![
                 Quantifier(Box::new(Char('a')), 10, 11),
                 Quantifier(Box::new(Char('b')), 2, 3),
-                Quantifier(Box::new(Seq(vec![Char('c'), Char('d'),Char('e')])), 4, 5),
+                Quantifier(Box::new(Seq(vec![Char('c'), Char('d'), Char('e')])), 4, 5),
             ]))
         )
     }

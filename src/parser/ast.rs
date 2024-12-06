@@ -8,7 +8,7 @@ pub enum Ast {
     Or(Vec<Ast>),
     Optional(Box<Ast>),
     CS(Box<Ast>),
-    Quantifier(Box<Ast>, u32, u32)
+    Quantifier(Box<Ast>, u32, u32),
 }
 
 impl Ast {
@@ -33,7 +33,7 @@ impl Ast {
             Self::Optional(inner) => inner.is_cs(),
             Self::Or(inner) => inner.iter().all(|i| i.is_cs()),
             Self::Seq(inner) => inner.iter().all(|i| i.is_cs()),
-            Self::Quantifier(inner, _, _) => inner.is_cs()
+            Self::Quantifier(inner, _, _) => inner.is_cs(),
         }
     }
 

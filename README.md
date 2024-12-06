@@ -1,8 +1,16 @@
-# Reggy
+# `reggy`
 
 A friendly regular expression dialect for text analytics. Typical regex features are removed/adjusted to make natural language queries easier. Unicode-aware and able to search a stream with several patterns at once. 
 
-`cargo add reggy`
+## Should I Use `reggy`?
+
+If you are working on a text analytics problem with streaming datasets, you may find the feature set compelling.
+
+| Crate                                             | Match Streams? | Case insensitivity support?                                                        | Pattern Flexibility? |
+|---------------------------------------------------|----------------|------------------------------------------------------------------------------------|----------------------|
+| [`aho-corasick`]( https://docs.rs/aho-corasick/ ) | ✅              | simple ASCII                                                                       | String set           |
+| [`regex`]( https://docs.rs/regex )                | ❌              | [Unicode best-effort](https://www.unicode.org/reports/tr18/#Simple_Loose_Matches)  | Full-featured regex  |
+| `reggy`                                           | ✅              | [Unicode best-effort]( https://www.unicode.org/reports/tr18/#Simple_Loose_Matches) | Regex subset         |
 
 ## API Usage
 
@@ -15,12 +23,12 @@ assert_eq!(
 );
 ```
 
-Use the [`Ast`](https://doc-sieve.github.io/reggy/reggy/enum.Ast.html) struct to transpile to [normal](https://docs.rs/regex/) regex syntax.[^1]
+Use the [`Ast`](https://doc-sieve.github.io/reggy/reggy/enum.Ast.html) struct to transpile to [normal](https://docs.rs/regex/) regex syntax.
 ```rust
-let ast = Ast::parse(r"do(gg.)?|(!CAT|CAR FAR)").unwrap();
+let ast = Ast::parse(r"dog(gy)?|dawg|(!CAT|KITTY CAT)").unwrap();
 assert_eq!(
     ast.to_regex(),
-    r"(?mi:do(?:gg\.)?|(?-i:CAT|CAR FAR))"
+    r"\b(?mi:dog(?:gy)?|dawg|(?-i:CAT|KITTY\s+CAT))\b"
 );
 ```
 
@@ -64,7 +72,7 @@ See more in the [API docs](https://doc-sieve.github.io/reggy).
 
 ## Pattern Language
 
-`Reggy` is case-insensitive by default. Spaces match any amount of whitespace (i.e. `\s+`). All the reserved characters mentioned below (`\`, `(`, `)`, `{`, `}`, `?`, `|`, `#`, and `!`) may be escaped with a backslash for a literal match. Patterns are surrounded by implicit [unicode word boundaries](https://unicode.org/reports/tr29) (i.e. `\b`). Empty patterns or subpatterns are not permitted.
+`reggy` is case-insensitive by default. Spaces match any amount of whitespace (i.e. `\s+`). All the reserved characters mentioned below (`\`, `(`, `)`, `{`, `}`, `?`, `|`, `#`, and `!`) may be escaped with a backslash for a literal match. Patterns are surrounded by implicit [unicode word boundaries](https://unicode.org/reports/tr29) (i.e. `\b`). Empty patterns or subpatterns are not permitted.
 
 ### Examples
 
@@ -90,13 +98,17 @@ See more in the [API docs](https://doc-sieve.github.io/reggy).
 
 `#.##` matches `3.14`
 
+*Match exactly n times with* `{n}`*, or between n and m times with* `{n,m}`
+
+`(very){1,4} strange` matches `very very very strange`
+
 ## Definitely-Complete Matches
 
-`Reggy` follows greedy matching semantics. A pattern may match after one step of a stream, yet may match a longer form depending on the next step. For example, `ab|abb` will match `s.next("ab")`, but a subsequent call to `s.next("b")` would create a longer match, `"abb"`, which should supercede the match `"ab"`.
+`reggy` follows greedy matching semantics. A pattern may match after one step of a stream, yet may match a longer form depending on the next step. For example, `ab|abb` will match `s.next("ab")`, but a subsequent call to `s.next("b")` would create a longer match, `"abb"`, which should supercede the match `"ab"`.
 
-`Search` only yields matches once they are definitely complete and cannot be superceded by future `next` calls. Each pattern has a [maximum byte length](https://doc-sieve.github.io/reggy/reggy/enum.Ast.html#method.max_bytes) `L`, counting contiguous whitespace as 1 byte.[^2] Once `reggy` has streamed at most `L` bytes past the start of a match without superceding it, that match will be yielded. Matches may be yielded earlier if the DFA reaches a dead state.
+`Search` only yields matches once they are definitely complete and cannot be superceded by future `next` calls. Each pattern has a [maximum byte length](https://doc-sieve.github.io/reggy/reggy/enum.Ast.html#method.max_bytes) `L`, counting contiguous whitespace as 1 byte.[^1] Once `reggy` has streamed at most `L` bytes past the start of a match without superceding it, that match will be yielded. Matches may be yielded earlier if the DFA reaches a dead state.
 
-As a consequence, **the `Match`es returned by a given `Search` are the same regardless of how a given haystack stream is segmented**. `Search::next` returns `Match`es as soon as it practically can while respecting this invariant.
+As a consequence, **the `Match`es returned by a given `Search` are the same regardless of how a given haystack stream is chunked**. `Search::next` returns `Match`es as soon as it practically can while respecting this invariant.
 
 ## Implementation
 
@@ -104,6 +116,4 @@ The pattern language is parsed with [`lalrpop`](https://lalrpop.github.io/lalrpo
 
 The search routines use a [`regex_automata::dense::DFA`](https://docs.rs/regex-automata/latest/regex_automata/dfa/dense/struct.DFA.html). Compared to other regex engines, the dense DFA is memory-intensive and slow to construct, but searches are fast. Unicode word boundaries are handled by the [`unicode_segmentation`](https://docs.rs/unicode-segmentation/latest) crate.
 
-[^1]: The resulting patterns are equivalent, except that `reggy` parses any continuous substring of spaces in the pattern as `\s+`, which is transpiled as ` `, and surrounds patterns with implicit word boundaries, which are not transpiled.
-
-[^2]: This is why unbounded quantifiers are absent from `reggy`. When a pattern requires `*` or `+`, users should choose an upper limit (`{0,n}`, `{1,n}`) instead. Relying on the DFA's dead state to flush matches is a bad idea when the number of patterns increases; it only takes one unlucky pattern to keep the DFA alive for an indeterminate number of stream steps.
+[^1]: This is why unbounded quantifiers are absent from `reggy`. When a pattern requires `*` or `+`, users should choose an upper limit (`{0,n}`, `{1,n}`) instead. Relying on the DFA's dead state to flush matches is a bad idea when the number of patterns increases; it only takes one unlucky pattern to keep the DFA alive for an indeterminate number of stream steps.

@@ -106,7 +106,7 @@ impl Search {
 
     /// Compile from already-parsed ASTs
     pub fn new(patterns: &[Ast]) -> Self {
-        let transpiled_patterns = patterns.iter().map(Ast::to_regex).collect::<Vec<_>>();
+        let transpiled_patterns = patterns.iter().map(Ast::to_regex_internal).collect::<Vec<_>>();
         let pattern_max_lens = patterns.iter().map(Ast::max_bytes).collect();
 
         let build_cfg = dfa::dense::Config::new().match_kind(MatchKind::All);
@@ -149,11 +149,8 @@ impl Search {
         }
 
         if last_push_state {
-            self.state.push(VisitedWord::new(
-                last_pos,
-                last_ws_folded_pos,
-                &self.dfa
-            ));
+            self.state
+                .push(VisitedWord::new(last_pos, last_ws_folded_pos, &self.dfa));
         }
 
         self.state.retain_mut(|word| {
@@ -167,10 +164,6 @@ impl Search {
             } else {
                 for &b in haystack.as_bytes() {
                     let next = self.dfa.next_state(word.state, b);
-                    if self.dfa.is_dead_state(next) {
-                        matches.extend(word.dump());
-                        return false;
-                    }
                     word.state = next;
                 }
             }
@@ -184,10 +177,24 @@ impl Search {
                     let max_folded_pattern_len =
                         self.pattern_max_lens[candidate_pattern.as_usize()];
                     if self.ws_folded_pos - word.ws_folded_start >= max_folded_pattern_len {
-                        matches.push(Match {
+                        let m = Match {
                             id: candidate_pattern.as_usize(),
                             span: (word.start, *candidate_pos),
-                        });
+                        };
+
+                        // preserve leftmost-longest
+                        let mut found = false;
+                        for already in &mut matches {
+                            if already.id == m.id {
+                                already.span.0 = already.span.0.min(m.span.0);
+                                found = true;
+                                break;
+                            }
+                        }
+
+                        if !found {
+                            matches.push(m);
+                        }
                         false
                     } else {
                         true
@@ -212,22 +219,34 @@ impl Search {
 
     /// Yield any pending, not-definitely-complete matches
     pub fn peek_finish(&self) -> Vec<Match> {
-        self.state
-            .iter()
-            .flat_map(VisitedWord::dump)
-            .collect()
+        let match_iter = self.state.iter().flat_map(VisitedWord::dump);
+        let mut filtered_matches: Vec<Match> = vec![];
+
+        // preserve leftmost-longest
+        let mut found = false;
+        for m in match_iter {
+            for already in &mut filtered_matches {
+
+                if already.id == m.id {
+                    already.span.0 = already.span.0.min(m.span.0);
+                    found = true;
+                    break;
+                }
+            }
+    
+            if !found {
+                filtered_matches.push(m);
+            }    
+        }
+
+        filtered_matches
     }
 
     /// Clear the match state, yielding any pending, not-definitely-complete matches
     pub fn finish(&mut self) -> Vec<Match> {
-        self.pos = 0;
-        self.ws_folded_pos = 0;
-        self.push_state = true;
-
-        std::mem::take(&mut self.state)
-            .iter()
-            .flat_map(VisitedWord::dump)
-            .collect()
+        let res = self.peek_finish();
+        self.reset();
+        res
     }
 
     /// Clear the match state
@@ -270,7 +289,7 @@ mod tests {
     }
 
     #[test]
-    fn segment_invariant_fuzz() {
+    fn chunk_invariant_fuzz() {
         use rand::prelude::*;
 
         let mut rng = SmallRng::seed_from_u64(1);
@@ -288,7 +307,7 @@ mod tests {
                 res.push(((d[i] % 3) + 97) as u8 as char);
                 if rng.gen::<i32>() % 2 == 0 {
                     res.push('?');
-                }    
+                }
             }
 
             res
@@ -304,8 +323,7 @@ mod tests {
                 res.push(((d % 3) + 97) as u8 as char);
                 if rng.gen::<i32>() % 2 == 0 {
                     res.push(' ');
-                }    
-
+                }
             }
 
             res
@@ -347,7 +365,11 @@ mod tests {
         canonical_matches.extend(s.finish());
 
         for i in 0..N_PARTITION_RUNS {
-            assert_eq!(all_match_sets[i], canonical_matches, "Partition {} did not match canon", i);
+            assert_eq!(
+                all_match_sets[i], canonical_matches,
+                "Partition {} did not match canon",
+                i
+            );
         }
     }
 }
