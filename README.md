@@ -52,7 +52,7 @@ assert_eq!(
 ```
 
 Call `Search::next` again to continue with the same search state.
-Note that `"John Doe"` matched across the `next` boundary, and spans are relative to the start of the stream.
+Note that `"John Doe"` matched across the chunk boundary, and spans are relative to the start of the stream.
 ```rust
 let john_match = Match::new(1, (14, 22));
 let money_match_1 = Match::new(0, (23, 29));
@@ -116,4 +116,4 @@ The pattern language is parsed with [`lalrpop`](https://lalrpop.github.io/lalrpo
 
 The search routines use a [`regex_automata::dense::DFA`](https://docs.rs/regex-automata/latest/regex_automata/dfa/dense/struct.DFA.html). Compared to other regex engines, the dense DFA is memory-intensive and slow to construct, but searches are fast. Unicode word boundaries are handled by the [`unicode_segmentation`](https://docs.rs/unicode-segmentation/latest) crate.
 
-[^1]: This is why unbounded quantifiers are absent from `reggy`. When a pattern requires `*` or `+`, users should choose an upper limit (`{0,n}`, `{1,n}`) instead. Relying on the DFA's dead state to flush matches is a bad idea when the number of patterns increases; it only takes one unlucky pattern to keep the DFA alive for an indeterminate number of stream steps.
+[^1]: This is why unbounded quantifiers are absent from `reggy`. When a pattern requires `*` or `+`, users should choose an upper limit (`{0,n}`, `{1,n}`) instead.
