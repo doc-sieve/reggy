@@ -1,5 +1,5 @@
-use regex_syntax::is_meta_character;
 use regex_syntax::ast as re_ast;
+use regex_syntax::is_meta_character;
 
 use super::Ast;
 
@@ -29,7 +29,7 @@ fn perl_class(kind: re_ast::ClassPerlKind) -> re_ast::Ast {
 fn word_boundary() -> re_ast::Ast {
     re_ast::Ast::Assertion(Box::new(re_ast::Assertion {
         span: dummy_span(),
-        kind: re_ast::AssertionKind::WordBoundary
+        kind: re_ast::AssertionKind::WordBoundary,
     }))
 }
 
@@ -157,7 +157,7 @@ impl Ast {
                         ast: Box::new(perl_class(re_ast::ClassPerlKind::Space)),
                     })
                 } else {
-                    space   
+                    space
                 }
             }
 
@@ -227,9 +227,10 @@ impl Ast {
                     kind: re_ast::GroupKind::NonCapturing(group_flag_cim()),
                     ast: Box::new(self.to_regex_ast_inner(false, true, true)),
                 }),
-                word_boundary()
-            ]
-        }.into_ast()
+                word_boundary(),
+            ],
+        }
+        .into_ast()
     }
 
     /// Transpile to a [regex](https://docs.rs/regex/) string

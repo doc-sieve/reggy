@@ -106,7 +106,10 @@ impl Search {
 
     /// Compile from already-parsed ASTs
     pub fn new(patterns: &[Ast]) -> Self {
-        let transpiled_patterns = patterns.iter().map(Ast::to_regex_internal).collect::<Vec<_>>();
+        let transpiled_patterns = patterns
+            .iter()
+            .map(Ast::to_regex_internal)
+            .collect::<Vec<_>>();
         let pattern_max_lens = patterns.iter().map(Ast::max_bytes).collect();
 
         let build_cfg = dfa::dense::Config::new().match_kind(MatchKind::All);
@@ -226,17 +229,16 @@ impl Search {
         let mut found = false;
         for m in match_iter {
             for already in &mut filtered_matches {
-
                 if already.id == m.id {
                     already.span.0 = already.span.0.min(m.span.0);
                     found = true;
                     break;
                 }
             }
-    
+
             if !found {
                 filtered_matches.push(m);
-            }    
+            }
         }
 
         filtered_matches
