@@ -1,4 +1,5 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, VecDeque};
+use std::io::{self, BufRead};
 
 use regex_automata::dfa::Automaton;
 use regex_automata::util::{
@@ -220,6 +221,17 @@ impl Search {
         words.flat_map(|w| self.step_word(w)).collect()
     }
 
+    /// Iterate over a buffered reader
+    pub fn iter_lines<'a, R: BufRead>(&'a mut self, reader: R) -> StreamSearchLines<'a, R> {
+        StreamSearchLines {
+            search: self,
+            reader,
+            res_buf: VecDeque::new(),
+            line_buf: String::new(),
+            closed: false
+        }
+    }
+
     /// Yield any pending, not-definitely-complete matches
     pub fn peek_finish(&self) -> Vec<Match> {
         let match_iter = self.state.iter().flat_map(VisitedWord::dump);
@@ -257,6 +269,46 @@ impl Search {
         self.ws_folded_pos = 0;
         self.push_state = true;
         self.state.clear();
+    }
+}
+
+pub struct StreamSearchLines<'a, R: io::BufRead> {
+    search: &'a mut Search,
+    reader: R,
+    res_buf: VecDeque<Match>,
+    line_buf: String,
+    closed: bool
+}
+
+impl<'a, R: io::BufRead> Iterator for StreamSearchLines<'a, R> {
+    type Item = Result<Match, io::Error>;
+
+    fn next(&mut self) -> Option<Result<Match, io::Error>> {
+        if let Some(res) = self.res_buf.pop_front() {
+            return Some(Ok(res))
+        } else if self.closed {
+            return None
+        }
+
+        loop {
+            self.line_buf.clear();
+            let line = self.reader.read_line(&mut self.line_buf);
+            match line {
+                Ok(len) => {
+                    if len == 0 {
+                        self.closed = true;
+                        self.res_buf = VecDeque::from(self.search.finish());
+                        return self.res_buf.pop_front().map(|m| Ok(m));
+                    } else {
+                        self.res_buf = VecDeque::from(self.search.next(&self.line_buf));
+                        if let Some(res) = self.res_buf.pop_front() {
+                            return Some(Ok(res))
+                        }
+                    }
+                },
+                Err(e) => return Some(Err(e)),
+            }    
+        }
     }
 }
 
